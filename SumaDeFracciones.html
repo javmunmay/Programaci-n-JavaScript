@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Suma de Fracciones</title>
+
+    <script>
+      let fraccionCount = 1; // Contador para llevar la cuenta de las fracciones
+
+        // Función para añadir una nueva fracción
+        function agregarFraccion() {
+            fraccionCount++; // Aumentar el contador para nuevas fracciones
+
+        // Crear el contenedor de una nueva fracción
+        let nuevaFraccion = document.createElement("div");
+        nuevaFraccion.classList.add("fraccion");
+
+        // Crear los inputs de numerador y denominador para la nueva fracción
+        nuevaFraccion.innerHTML = `
+        <label for="numerador${fraccionCount}">Numerador:</label>
+        <input type="text" id="numerador${fraccionCount}" required />
+        <label for="denominador${fraccionCount}">Denominador:</label>
+        <input type="text" id="denominador${fraccionCount}" required /><br />
+    `;
+
+        // Añadir la nueva fracción al contenedor principal
+        document
+          .getElementById("fraccionesContainer")
+          .appendChild(nuevaFraccion);
+      }
+
+        // Función para sumar todas las fracciones
+        function sumarFracciones() {
+            let numeradorTotal = 0;
+            let denominadorComun = 1;
+
+        // Validaciones y cálculo del denominador común
+        for (let i = 1; i <= fraccionCount; i++) {
+          let numerador = parseFloat(
+            document.getElementById(`numerador${i}`).value
+          );
+          let denominador = parseFloat(
+            document.getElementById(`denominador${i}`).value
+          );
+
+          // Validar que los campos no estén vacíos y sean números válidos
+          if (isNaN(numerador) || isNaN(denominador)) {
+            alert("Por favor, introduce solo números válidos.");
+            return;
+          }
+
+          // Validar que el denominador no sea cero
+          if (denominador === 0) {
+            alert("El denominador no puede ser cero.");
+            return;
+          }
+
+          // Multiplicamos los denominadores para obtener el denominador común
+          denominadorComun *= denominador;
+        }
+
+        // Cálculo del numerador ajustado al denominador común
+        for (let i = 1; i <= fraccionCount; i++) {
+          let numerador = parseFloat(
+            document.getElementById(`numerador${i}`).value
+          );
+          let denominador = parseFloat(
+            document.getElementById(`denominador${i}`).value
+          );
+
+          // Sumar los numeradores ajustados al denominador común
+          numeradorTotal += numerador * (denominadorComun / denominador);
+        }
+
+        // Mostrar el resultado de la suma de fracciones
+        document.getElementById("resultadoFracciones").innerHTML =
+          "La suma de las fracciones es: " +
+          numeradorTotal +
+          " / " +
+          denominadorComun;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Suma de Fracciones</h1>
+
+    <form id="fraccionesForm">
+      <div id="fraccionesContainer">
+        <div class="fraccion">
+          <label for="numerador1">Numerador:</label>
+          <input type="text" id="numerador1" required />
+          <label for="denominador1">Denominador:</label>
+          <input type="text" id="denominador1" required /><br />
+        </div>
+      </div>
+
+      <button type="button" onclick="agregarFraccion()">Añadir Fracción</button>
+      <button type="button" onclick="sumarFracciones()">
+        Sumar Fracciones
+      </button>
+    </form>
+
+    <div id="resultadoFracciones"></div>
+  </body>
+</html>

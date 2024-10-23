@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Examen 1</title>
+    <style type="text/css">
+      #datos_calculo {
+        margin-left: 20px;
+        margin-right: 77px;
+        float: left;
+      }
+      
+      #figuras {
+        text-align: center;
+        margin: 0 20px;
+        float: left;
+        margin-bottom: 40px;
+      }
+      
+      #ecuacion {
+        margin: 0 20px;
+        float: left;
+      }
+  
+      
+    #soluciones {
+      border: solid 1px blue;
+      width: 17em;
+      height: 7em;
+      padding: 0.4em;
+      display: inline-block;
+    }
+    
+    #titulo_sol {
+      font-size: 1.2em;
+      color: blue;
+    }
+    
+    
+    
+    #fracciones {
+    		clear: both;
+        margin-left: 20px;
+        padding: 15px;
+    /*    border: 2px solid blue;  */
+      }
+      
+      .fraccion {
+        float: left;
+        margin: 8px;
+   /*     border: 1px solid blue;     */
+      }
+      
+      .fraccion input {
+        display: block;
+      }
+      
+      #SolFracciones {
+        margin: 25px;
+        overflow: hidden;
+      }
+    
+    
+    
+      
+    </style>
+
+<script type="text/javascript">
+
+  
+
+  
+  function datos_Calculos(e) {
+    var condicion = false;
+    var input = e.target;
+
+    
+    if (e.keyCode == 44 && input.value.includes(',')) {
+      condicion = false;
+    } else if (e.keyCode == 44 || (e.keyCode >= 48 && e.keyCode <= 57)) {
+      condicion = true;
+    }
+    return condicion;
+  }
+
+  
+  function datos_Ecuacion(e) {
+    var condicion = false;
+    var input = e.target;
+
+    
+    if (e.keyCode == 45 && (input.value.includes('-') || input.selectionStart != 0)) {
+      condicion = false;
+    } else if (e.keyCode == 8 || e.keyCode == 45 || (e.keyCode >= 48 && e.keyCode <= 57)) {
+      condicion = true;
+    }
+    return condicion;
+  }
+
+  
+  function datos_Fracciones(e) {
+    var condicion = false;
+    var input = e.target;
+
+    
+    if ((e.keyCode == 46 && input.value.includes('.')) || 
+        (e.keyCode == 45 && (input.value.includes('-') || input.selectionStart != 0))) {
+      condicion = false;
+    } else if (e.keyCode == 46 || e.keyCode == 45 || (e.keyCode >= 48 && e.keyCode <= 57)) {
+      condicion = true;
+    }
+    return condicion;
+  }
+
+  function operaciones_Figuras() {
+    var base = parseFloat(document.getElementById("base").value.replace(',', '.'));
+    var altura = parseFloat(document.getElementById("altura").value.replace(',', '.'));
+    var profundidad = parseFloat(document.getElementById("profundidad").value.replace(',', '.'));
+    var radio = parseFloat(document.getElementById("radio").value.replace(',', '.'));
+
+    var a_Rectangulo = document.getElementById("area_rectangulo").value = base * altura;
+    var v_Caja = document.getElementById("volumen_caja").value = a_Rectangulo * profundidad;
+    var a_Triangulo = document.getElementById("area_triangulo").value = a_Rectangulo / 2;
+    var a_Circulo = document.getElementById("area_circulo").value = Math.PI * Math.pow(radio, 2);
+    var v_Cilindro = document.getElementById("volumen_cilindro").value = a_Circulo * altura;
+    var v_Esfera = document.getElementById("volumen_esfera").value = (4 / 3) * Math.PI * Math.pow(radio, 3);
+  }
+
+
+
+  function operaciones_Ecuacion() {
+    var a = document.getElementById("a").value;
+    var b = document.getElementById("b").value;
+    var c = document.getElementById("c").value;
+
+    var interior_Ecuacion = Math.pow(b, 2) - (4 * a * c);
+    var operacion_x1 = document.getElementById("sol_x1");
+    var operacion_x2 = document.getElementById("sol_x2");
+
+    if (interior_Ecuacion >= 0) {
+      operacion_x1.innerHTML = (-b + Math.sqrt(interior_Ecuacion)) / (2 * a);
+      operacion_x2.innerHTML = (-b - Math.sqrt(interior_Ecuacion)) / (2 * a);
+    } else {
+      operacion_x1.innerHTML = "No existe una solución real";
+      operacion_x2.innerHTML = "No existe una solución real";
+    }
+  }
+
+  function operaciones_Fracciones() {
+    var numerador_f1 = parseFloat(document.getElementById("a1").value);
+    var denominador_f1 = parseFloat(document.getElementById("b1").value);
+    var numerador_f2 = parseFloat(document.getElementById("a2").value);
+    var denominador_f2 = parseFloat(document.getElementById("b2").value);
+
+    if (isNaN(numerador_f1) || isNaN(denominador_f1) || isNaN(numerador_f2) || isNaN(denominador_f2) || denominador_f1 === 0 || denominador_f2 === 0) {
+        alert("Por favor, introduzca valores válidos para las fracciones.");
+        return;
+    }
+
+    
+    var o_suma_numerador = numerador_f1 * denominador_f2 + numerador_f2 * denominador_f1;
+    var o_suma_denominador = denominador_f1 * denominador_f2;
+
+    
+    document.getElementById("r1").value = o_suma_numerador;
+    document.getElementById("r2").value = o_suma_denominador;
+    document.getElementById("rf").value = (o_suma_numerador / o_suma_denominador).toFixed(2);
+}
+
+
+function operaciones_FraccionesV2() {
+    var listaFracciones = document.getElementById("listaFracciones");
+    var fracciones = listaFracciones.getElementsByClassName("fraccion");
+
+    var sumaNumerador = 0;
+    var sumaDenominador = 1;
+
+    
+    for (var i = 0; i < fracciones.length; i++) {
+        var inputs = fracciones[i].getElementsByTagName("input");
+        var numerador = parseFloat(inputs[0].value);
+        var denominador = parseFloat(inputs[1].value);
+
+        if (isNaN(numerador) || isNaN(denominador) || denominador === 0) {
+            alert("Por favor, introduzca valores válidos para las fracciones.");
+            return;
+        }
+
+        
+        sumaNumerador = sumaNumerador * denominador + numerador * sumaDenominador;
+        sumaDenominador *= denominador;
+    }
+
+    
+    document.getElementById("r1").value = sumaNumerador;
+    document.getElementById("r2").value = sumaDenominador;
+    document.getElementById("rf").value = (sumaNumerador / sumaDenominador).toFixed(2);
+}
+
+
+  function annadir_Fracciones() {
+    var antigua_Fraccion = document.getElementById("f1"); 
+    var nueva_Fraccion = document.getElementById("listaFracciones"); 
+
+    var fraccion_Clonar = antigua_Fraccion.cloneNode(true); 
+    nueva_Fraccion.appendChild(fraccion_Clonar);
+  }
+
+
+window.onload = function () {
+    document.getElementById("datos_calculo").onkeypress = datos_Calculos;
+    document.getElementById("ecuacion").onkeypress = datos_Ecuacion;
+    document.getElementById("fracciones").onkeypress = datos_Fracciones;
+    document.getElementById("btCalcular").onclick = operaciones_Figuras;
+    document.getElementById("btSolEc").onclick = operaciones_Ecuacion;
+    document.getElementById("btSolF").onclick = operaciones_Fracciones;
+    document.getElementById("btSolF_V2").onclick = operaciones_FraccionesV2;
+    document.getElementById("btAnade").onclick = annadir_Fracciones;
+};
+
+
+</script>
+
+
+
+
+  </head>
+
+  <body>
+
+    <h2>Cálculo de Áreas y Volúmenes</h2>
+
+    <div id="datos_calculo">
+      <p>
+        Introduce los datos para el Cálculo:
+      </p>
+      <p>
+        Base (b) :
+        <input type="text" id="base" name="base" value="" size="4" maxlength="8">
+        <br/>
+        Altura (h):
+        <input type="text" id="altura" name="altura" value="" size="4" maxlength="8">
+        <br/>
+        Profundidad (c):
+        <input type="text" id="profundidad" name="profundidad" value="" size="4" maxlength="8">
+        <br/>
+        Radio (r):
+        <input type="text" id="radio" name="radio" value="" size="4" maxlength="8">
+        <br/>
+      </p>
+      <br/>
+      <input id="btCalcular" type="button" value="CALCULAR">
+    </div>
+    
+    <div id="figuras">
+      <table border="1">
+        <thead>
+          <tr>
+            <th>AREAS</th>
+            <th>VOLUMENES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td> Rectángulo
+            <br>
+            <img src="imagenes/Rectangulo.gif" width="150" height="150" alt="Rectángulo"/>
+            <br>
+            Area:
+            <input type="text" id="area_rectangulo" name="area_rectangulo" value="" readonly="readonly" />
+            </td>
+            <td> Caja
+            <br>
+            <img src="imagenes/Ortoedro.gif" width="150" height="150" alt="Caja"/>
+            <br>
+            Volumen:
+            <input type="text" id="volumen_caja" name="volumen_caja" value="" readonly="readonly" />
+            </td>
+          </tr>
+          <tr>
+            <td> Triángulo
+            <br>
+            <img src="imagenes/Triangulo.gif" width="150" height="150" alt="Triángulo"/>
+            <br>
+            Area:
+            <input type="text" id="area_triangulo" name="area_triangulo" value="" readonly="readonly" />
+            </td>
+            <td> Cilindro
+            <br>
+            <img src="imagenes/Cilindro.gif" width="150" height="150" alt="Cilindro"/>
+            <br>
+            Volumen:
+            <input type="text" id="volumen_cilindro" name="volumen_cilindro" value="" readonly="readonly" />
+            </td>
+          </tr>
+          <tr>
+            <td> Círculo
+            <br>
+            <img src="imagenes/Circulo.gif" width="150" height="150" alt="Círculo"/>
+            <br>
+            Area:
+            <input type="text" id="area_circulo" name="area_circulo" value="" readonly="readonly" />
+            </td>
+            <td> Esfera
+            <br>
+            <img src="imagenes/Esfera.gif" width="150" height="150" alt="Esfera"/>
+            <br>
+            Volumen:
+            <input type="text" id="volumen_esfera" name="volumen_esfera" value="" readonly="readonly" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    
+    <div id="ecuacion">
+      <h3>Solución para la Ecuación de 2º Grado</h3>
+      <p>
+        <input type="text" id="a" name="a" value="" size="1" maxlength="4" /> X2 + 
+        <input type="text" id="b" name="b" value="" size="1" maxlength="4"  /> X + 
+        <input type="text" id="c" name="c" value="" size="1" maxlength="4"  /> = 0 
+        <input id="btSolEc" type="button" value="Calcular Ec.">
+      </p>
+      <p>
+        <div id="soluciones"><span id="titulo_sol">Soluciones:</span> 
+          <span id="valores_sol"> 
+            <p>
+              X1 = <span id="sol_x1"> </span> <br />
+              X2 = <span id="sol_x2"> </span>
+            </p>
+          </span>
+        </div>
+      </p>
+    </div>
+    
+    
+    <br>
+    
+    
+    <div id="fracciones">
+      <h3>Suma de Fracciones:</h3>
+      <div id="SolFracciones">
+      	
+       <div id="listaFracciones">
+       	
+        <div id="f1" class="fraccion">
+        <input type="text" id="a1" name="a1" value="2" size="1" maxlength="4" /> 
+        <div> <hr align="left"> </div>
+        <input type="text" id="b1" name="b1" value="3" size="1" maxlength="4"  /> 
+
+        </div>
+        
+        <div id="fsuma" class="fraccion"><br>  + <br> </div>
+        
+        <div id="f2" class="fraccion">
+        <input type="text" id="a2" name="a2" value="3" size="1" maxlength="4"  /> 
+        <div> <hr align="left"> </div>
+        <input type="text" id="b2" name="b2" value="5" size="1" maxlength="4"  />
+        </div>
+        
+        
+   
+       </div>
+       
+        
+        
+        <div class="fraccion"><br>  = <br> </div>
+        
+        <div class="fraccion">
+        <input type="text" id="r1" name="r1" value="" size="1" maxlength="4" readonly="readonly" /> 
+        <div> <hr align="left"> </div>
+        <input type="text" id="r2" name="r2" value="" size="1" maxlength="4" readonly="readonly" />
+        </div>
+        
+         <div class="fraccion"><br>  = <br> </div>
+        
+        <div class="fraccion"><br>  <input type="text" id="rf" name="rf" readonly="readonly" /> <br> </div>
+        
+      </div>
+      
+       <p>
+       	<input id="btAnade" type="button" value="Añadir Fracción"> 
+       	<input id="btSolF" type="button" value="Calcular Suma">
+        <input id="btSolF_V2" type="button" value="Calcular Suma V2">
+       </p>
+
+      
+    </div>
+    
+    
+
+  </body>
+</html>

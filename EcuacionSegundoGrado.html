@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resolución de Ecuaciones de Segundo Grado</title>
+
+    <script>
+      /*Parte 2: Resolución de Ecuaciones de Segundo Grado*/
+
+      /*
+        Validación:
+        Los inputs deben permitir un único signo negativo correctamente ubicado.
+        Debes manejar correctamente los casos en los que la ecuación no tiene soluciones reales.
+        */
+
+      function resolverEcuacion() {
+        let a = parseFloat(document.getElementById("a").value);
+        let b = parseFloat(document.getElementById("b").value);
+        let c = parseFloat(document.getElementById("c").value);
+
+        if (isNaN(a) || isNaN(b) || isNaN(c)) {
+          alert("Por favor, introduce solo números válidos.");
+          return;
+        }
+
+        let dentroRaiz = Math.pow(b,2) - (4 * a * c);
+
+        if (dentroRaiz < 0) {
+            document.getElementById("soluciones").innerHTML="La ecuación de segundo grado no tiene soluciones";
+        }else{ // Math.sqrt para hacer la raiz cuadrada
+            let solucion1 = (-b + Math.sqrt(dentroRaiz))/(2 * a) ;
+            let solucion2 = (-b - Math.sqrt(dentroRaiz))/(2 * a) ;
+
+            document.getElementById("soluciones").innerHTML="Las dos soluciones de la ecuacion de segundo grado son: " + "<br>" + 
+            "Solucion 1: " + solucion1 + "<br>" +
+            "Solucion 2: " + solucion2;
+
+        }
+
+      }
+
+      /*Parte 3: Suma de Fracciones*/
+      /*Parte 4: Clase NIF*/
+    </script>
+  </head>
+  <body>
+    <h1>Resolución de Ecuaciones de Segundo Grado</h1>
+
+    <form id="ecuacionForm">
+      <label for="a">Coeficiente a:</label>
+      <input type="text" id="a" required /><br />
+
+      <label for="b">Coeficiente b:</label>
+      <input type="text" id="b" required /><br />
+
+      <label for="c">Coeficiente c:</label>
+      <input type="text" id="c" required /><br /><br />
+
+      <button type="button" onclick="resolverEcuacion()">Resolver</button>
+    </form>
+
+    <div id="soluciones"></div>
+  </body>
+</html>

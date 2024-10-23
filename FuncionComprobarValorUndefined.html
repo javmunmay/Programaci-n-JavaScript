@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <script>
+      function noEsUndefined(valor) {
+        return typeof valor !== "undefined";
+      }
+
+      //Ejemplo de uso:
+
+      let variableDefinida = 42;
+      let variableIndefinida;
+
+      console.log(noEsUndefined(variableDefinida)); // true
+      console.log(noEsUndefined(variableIndefinida)); // false
+
+      //Alternativa con comprobación directa:
+
+      function noEsUndefined(valor) {
+        return valor !== undefined;
+      }
+
+      
+    </script>
+  </head>
+  <body></body>
+</html>

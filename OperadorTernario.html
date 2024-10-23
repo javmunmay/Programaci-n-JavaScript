@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      /*El operador ternario en JavaScript es una forma compacta 
+        de hacer una condición if-else en una sola línea. Su sintaxis es:
+        */
+
+      condición ? expresiónSiVerdadera : expresiónSiFalsa;
+
+      //Ejemplo Básico:
+
+      let edad = 18;
+      let mensaje = edad >= 18 ? "Eres mayor de edad" : "Eres menor de edad";
+      console.log(mensaje); // "Eres mayor de edad"
+
+      //Asignación Condicional:
+
+      let numero = 5;
+      let tipo = numero % 2 === 0 ? "Par" : "Impar";
+      console.log(tipo); // "Impar"
+
+      //Ejecutar Funciones con el Operador Ternario:
+
+      function saludoFormal() {
+        return "Buenos días";
+      }
+
+      function saludoInformal() {
+        return "¡Hola!";
+      }
+
+      let hora = 10;
+      let saludo = hora < 12 ? saludoFormal() : saludoInformal();
+      console.log(saludo); // "Buenos días"
+
+      //Anidar Operadores Ternarios
+
+      let nota = 85;
+      let resultado1 = nota >= 90 ? "A" : nota >= 80 ? "B" : "C";
+      console.log(resultado); // "B"
+
+      //Ejercicio Rápido:
+      /*Tarea: Usando un operador ternario, verifica si un número es positivo, 
+        negativo o cero y almacena el resultado en una variable.*/
+
+      let numero2 = -3;
+      let resultado2 = numero2 > 0 ? "Positivo" : numero2 < 0 ? "Negativo" : "Cero";
+      console.log(resultado); // "Negativo"
+
+      //Comparación con if-else:
+
+      if (numero > 0) {
+        resultado = "Positivo";
+      } else if (numero < 0) {
+        resultado = "Negativo";
+      } else {
+        resultado = "Cero";
+      }
+
+
+
+
+    </script>
+  </head>
+  <body></body>
+</html>

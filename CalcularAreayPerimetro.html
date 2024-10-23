@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cálculo de Áreas y Volúmenes</title>
+
+    <script>
+      /*Parte 1: Cálculo de Áreas y Volúmenes*/
+
+      /*
+        Área de un rectángulo.
+        Área de un triángulo.
+        Volumen de una caja.
+        Área de un círculo.
+        Volumen de un cilindro.
+        Volumen de una esfera.
+        */
+
+      /*
+        Validación: Los valores introducidos deben ser números decimales positivos.
+        */
+
+      function calcularAreasVolumenes() {
+        let base = parseFloat(document.getElementById("base").value);
+        let altura = parseFloat(document.getElementById("altura").value);
+        let profundidad = parseFloat(document.getElementById("profundidad").value);
+        let radio = parseFloat(document.getElementById("radio").value);
+
+        if (isNaN(base) || isNaN(altura) || isNaN(profundidad) || isNaN(radio)) {
+
+          alert(
+            "No puede introducir caracteres ni otros elementos que no sean numeros."
+          );
+
+        } else if (
+          (base < 0) ||
+          (altura < 0) ||
+          (profundidad < 0) ||
+          (radio < 0)
+        ) {
+
+          alert("Los numeros introducidos deben ser positivos");
+
+        } else {
+          let areaRectagulo = base * altura;
+          let areaTriangulo = (base * altura) / 2;
+          let areaCirculo = Math.PI * (radio * radio);
+          let areaCilindro =
+            2 * Math.PI * radio * altura + 2 * Math.PI * (radio * radio);
+          let areaEsfera = 4 * Math.PI * (radio * radio);
+          let volumenCaja = base * altura * profundidad;
+
+          document.getElementById("resultados").innerHTML =
+            "El area del rectangulo es: " +
+            areaRectagulo +
+            "<br> " +
+            "El area del triangulo es: " +
+            areaTriangulo +
+            "<br> " +
+            "El area del circulo es: " +
+            areaCirculo +
+            "<br> " +
+            "El area del cilindro es: " +
+            areaCilindro +
+            "<br> " +
+            "El area de la esfera es: " +
+            areaEsfera +
+            "<br> " +
+            "El volumen de la caja es: " +
+            volumenCaja +
+            "<br> ";
+        }
+      }
+
+
+    </script>
+  </head>
+  <body>
+    <h1>Cálculo de Áreas y Volúmenes</h1>
+
+    <form id="areaVolumenForm">
+      <label for="base">Base:</label>
+      <input type="text" id="base" required /><br />
+
+      <label for="altura">Altura:</label>
+      <input type="text" id="altura" required /><br />
+
+      <label for="profundidad">Profundidad:</label>
+      <input type="text" id="profundidad" required /><br />
+
+      <label for="radio">Radio:</label>
+      <input type="text" id="radio" required /><br /><br />
+
+      <button type="button" onclick="calcularAreasVolumenes()">Calcular</button>
+    </form>
+
+    <div id="resultados"></div>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <script>
+      /*Crear un elemento nuevo en el DOM*/ $;
+
+      // Crear un nuevo elemento div
+      let nuevoDiv = document.createElement("div");
+
+      // Añadir contenido al div
+      nuevoDiv.textContent = "Este es un nuevo div";
+
+      // Añadir una clase al div
+      nuevoDiv.classList.add("mi-clase");
+
+      // Insertar el div en el body o en otro elemento
+      document.body.appendChild(nuevoDiv);
+
+      /*----------------------------------*/
+
+      //Insertar un elemento antes o después de otro
+
+      // Crear un nuevo párrafo
+      let nuevoParrafo = document.createElement("p");
+      nuevoParrafo.textContent = "Párrafo nuevo";
+
+      // Seleccionar un elemento existente en el DOM
+      let elementoExistente = document.getElementById("mi-elemento");
+
+      // Insertar antes del elemento existente
+      elementoExistente.parentNode.insertBefore(
+        nuevoParrafo,
+        elementoExistente
+      );
+
+      // Insertar después del elemento existente (más moderno)
+      elementoExistente.insertAdjacentElement("afterend", nuevoParrafo);
+
+      /*----------------------------------*/
+
+      // Eliminar un elemento del DOM
+
+      // Seleccionar el elemento a eliminar
+      let elementoEliminar = document.getElementById("mi-elemento");
+
+      // Eliminar el elemento
+      elementoEliminar.remove();
+
+      /*----------------------------------*/
+
+      //Modificar atributos y estilos de un elemento
+
+      // Seleccionar el elemento
+      let miElemento = document.querySelector(".mi-elemento");
+
+      // Modificar un atributo
+      miElemento.setAttribute("data-info", "valor-nuevo");
+
+      // Modificar estilos directamente
+      miElemento.style.color = "red";
+      miElemento.style.backgroundColor = "blue";
+
+      /*----------------------------------*/
+
+      //Clonar un elemento existente
+
+      // Seleccionar el elemento a clonar
+      let elementoOriginal = document.getElementById("elemento-original");
+
+      // Clonar el elemento (true para clonar también sus hijos)
+      let clonElemento = elementoOriginal.cloneNode(true);
+
+      // Insertar el clon en el DOM
+      document.body.appendChild(clonElemento);
+
+      /*----------------------------------*/
+
+      //Añadir un nuevo elemento con evento asociado
+
+      //// Crear un nuevo botón
+      let nuevoBoton = document.createElement("button");
+      nuevoBoton.textContent = "Haz clic aquí";
+
+      // Añadir un evento de clic al botón
+      nuevoBoton.addEventListener("click", function () {
+        alert("¡Botón clickeado!");
+      });
+
+      // Insertar el botón en el DOM
+      document.body.appendChild(nuevoBoton);
+
+      /*----------------------------------*/
+
+      /*Ejercicio Rápido:
+        Tarea: Crea un nuevo elemento div, añade un párrafo con texto 
+        dentro de él, y añade un botón que al hacer clic elimine el div.
+        */
+
+      // Crear el div
+      let divContainer = document.createElement("div");
+      divContainer.id = "mi-div";
+
+      // Crear el párrafo
+      let nuevoParrafo = document.createElement("p");
+      nuevoParrafo.textContent = "Este es un párrafo dentro del div.";
+
+      // Crear el botón
+      let botonEliminar = document.createElement("button");
+      botonEliminar.textContent = "Eliminar Div";
+
+      // Añadir evento al botón para eliminar el div
+      botonEliminar.addEventListener("click", function () {
+        divContainer.remove();
+      });
+
+      // Añadir el párrafo y el botón al div
+      divContainer.appendChild(nuevoParrafo);
+      divContainer.appendChild(botonEliminar);
+
+      // Añadir el div al body
+      document.body.appendChild(divContainer);
+    </script>
+  </head>
+  <body></body>
+</html>

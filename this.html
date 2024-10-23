@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <script>
+      /*
+        El uso de .this en JavaScript hace referencia al contexto en el que 
+        se está ejecutando el código. Es un concepto clave cuando trabajas con 
+        objetos, clases, y funciones. Aquí te dejo una guía rápida sobre cómo 
+        funciona:
+        */
+
+      //1. Dentro de un objeto
+      //Cuando usas .this dentro de un objeto, hace referencia al propio objeto:
+      const persona = {
+        nombre: "Javier",
+        saludar: function () {
+          console.log("Hola, mi nombre es " + this.nombre);
+        },
+      };
+
+      persona.saludar(); // "Hola, mi nombre es Javier"
+
+      //2. En una función normal
+      /*En una función, si no está dentro de un objeto, this hará referencia al objeto global, 
+      que en un navegador sería window:*/
+
+      function mostrarThis() {
+        console.log(this);
+      }
+
+      mostrarThis(); // En un navegador, esto mostrará el objeto `window`.
+
+      /*
+      3.En el contexto de clases (ES6)
+      */
+
+      class Coche {
+        constructor(marca) {
+          this.marca = marca;
+        }
+
+        mostrarMarca() {
+          console.log("Este coche es un " + this.marca);
+        }
+      }
+
+      let miCoche = new Coche("Toyota");
+      miCoche.mostrarMarca(); // "Este coche es un Toyota"
+
+      //En este ejemplo, this.marca hace referencia a la propiedad marca de la instancia miCoche.
+
+      /*
+      4. Problemas con this en funciones anidadas
+      
+      Un problema común es que dentro de funciones anidadas, this puede cambiar de contexto. 
+      Una solución es usar una función de flecha (arrow function) o almacenar this en una 
+      variable:
+      */
+
+      //Ejemplo sin arrow function (ERROR común):
+
+      const objeto1 = {
+        valor: 42,
+        metodo: function () {
+          setTimeout(function () {
+            console.log(this.valor); // undefined, `this` hace referencia al objeto global.
+          }, 1000);
+        },
+      };
+
+      objeto.metodo();
+
+      //Solución con arrow function::
+
+      const objeto = {
+        valor: 42,
+        metodo: function () {
+          setTimeout(() => {
+            console.log(this.valor); // 42, `this` aquí mantiene el contexto del objeto
+          }, 1000);
+        },
+      };
+
+      objeto.metodo();
+
+      /*
+        Ejercicio Rápido:
+        Tarea: Crea un objeto animal que tenga una propiedad tipo y un método 
+        que imprima el tipo de animal usando this.
+        */
+
+      const animal = {
+        tipo: "Perro",
+        mostrarTipo: function () {
+          console.log("El animal es un " + this.tipo);
+        },
+      };
+
+      animal.mostrarTipo(); // "El animal es un Perro"
+
+
+
+      
+    </script>
+  </head>
+  <body></body>
+</html>
