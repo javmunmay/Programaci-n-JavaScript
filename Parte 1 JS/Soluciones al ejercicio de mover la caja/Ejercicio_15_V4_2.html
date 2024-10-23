@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<title>Ejercicio 15 - Informaci?n sobre eventos</title>
+
+		<style type="text/css">
+			body {font-family: arial, helvetica;}
+			#info {width:160px; border:thin solid silver; padding:.5em; position: absolute; top:1px; left:2px;}
+			#info h1 {margin: 0;}
+		</style>
+
+		<script type="text/javascript">
+		
+		/* ************************************************************************************************************
+			ATENCIÓN ESTA VERSIÓN ES PARA QUE LA CAJA SE MUEVA EN FUNCIÓN DE DONDE LA AGARRES
+		 **************************************************************************************************************       
+		*/
+	 
+			//  Definimos la variable GLOBAL, donde se guarda el bot�n del rat�n que se ha pulsado:
+			var boton_raton = 0;
+			//  Definimos las variables que contendrán el desplazamiento del cursor dento del div info
+			var despCajaX = 0; 
+      var despCajaY = 0;
+			
+			window.onload = function() {
+				document.onmousemove = obtenerPosicion;
+				document.onkeypress = obtenerTecla;
+				document.onclick = cambiarColor;
+				document.getElementById("info").onmousedown = inicio_mover;
+				document.getElementById("info").onmouseup = fin_mover;
+			}
+			
+	 
+			function inicio_mover(evento) {
+				boton_raton = 1; 
+				
+				//  Obtenemos la posición del cursor y la de la caja en el momento de apretar el botón. Y obtenemos el desplazamiento de la caja:
+				despCajaX = evento.clientX - document.getElementById("info").style.left.split("px")[0];
+				despCajaY = evento.clientY - document.getElementById("info").style.top.split("px")[0];
+
+				//  Devolvemos false aquí y en fin_mover para que NO seleccione el texto. 
+			  return false;
+			}
+			
+			function fin_mover() {
+					boton_raton = 0; 
+			}
+
+			function cambiarColor() {
+				document.getElementById("info").style.backgroundColor = "#FFFFCC";
+			}
+			
+			function obtenerTecla(elEvento) {
+				var evento = elEvento || window.event;
+				var mensaje = new Array(); 
+				//  Mostramos el T�tulo:
+				mensaje[0] = "Teclado";
+				//  Mostramos el car�cter que se ha pulsado:
+				mensaje[1] = "Carácter [" + String.fromCharCode(evento.charCode) + "]";
+				//  Mostramos el c�digo ASCII de la letra que se ha pulsado:
+				mensaje[2] = "Código [" + evento.charCode + "]";
+				
+				//  Cambiamos el Color (azulito):
+				document.getElementById("info").style.backgroundColor = "#CCE6FF";
+				
+				//  Mostramos la Informaci�n:
+				muestraInformacion(mensaje);
+			}
+			
+			function obtenerPosicion(elEvento) {
+				//  Cogemos las coordenadas del Navegador:
+				var evento = elEvento || window.event;
+				var mensaje = new Array(); 
+				//  Mostramos el T�tulo:
+				mensaje[0] = "Ratón";
+				//  Cogemos las coordenadas del Navegador
+				mensaje[1] = "Navegador [" + evento.clientX + ", " + evento.clientY + "]";
+				//  Cogemos las coordenadas de la Pantala:
+				mensaje[2] = "Pantalla [" + evento.screenX + ", " + evento.screenY + "]";
+				
+				//  Cogemos las coordenadas de la P�gina:
+				mensaje[3] = "Página [" + evento.pageX + ", " + evento.pageY + "]";  
+				
+				info = document.getElementById("info");
+				//  Quitamos cualquier color:
+				info.style.backgroundColor = "";
+				
+				//  El meneito:
+				if (boton_raton == 1) {
+
+					mensaje[6] = "MOVIENDO";
+					mensaje[7] = "despCajaX = " + despCajaX;
+					mensaje[8] = "despCajaY = " + despCajaY;
+					mensaje[9] = "le meto [" + (evento.clientX - despCajaX )  + "," + (evento.clientY - despCajaY) +"]";
+					
+					//  Recalculamos la posición de la caja para que se ajuste su top y lef a donde está el cursor en ese momento:  
+					info.style.left = (evento.clientX - despCajaX ) + "px";
+					info.style.top = (evento.clientY - despCajaY) + "px";
+
+					info.style.backgroundColor = "pink";
+				}
+				mensaje[4] = "info.style.left = " + info.style.left;
+				mensaje[5] = "info.style.top = " + info.style.top;
+				//  Mostramos la Informaci�n:
+				muestraInformacion(mensaje);
+			}
+
+			function muestraInformacion(mensaje) {
+				document.getElementById("info").innerHTML = '<h1>'+mensaje[0]+'</h1>';
+				for(var i=1; i<mensaje.length; i++) {
+					document.getElementById("info").innerHTML += '<p>'+mensaje[i]+'</p>';
+				}
+			}
+				
+		</script>
+
+	</head>
+
+	<body>
+
+		<div id="info"></div>
+
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+	</body>
+</html>

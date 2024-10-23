@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+
+		<title>Ejercicio 15 - Informaci?n sobre eventos</title>
+
+		<style type="text/css">
+				body {font-family: arial, helvetica;}
+				#info {width:160px; border:thin solid silver; padding:.5em; position: absolute; top:1px; left:2px;}
+				#info h1 {margin: 0;}
+		</style>
+
+		<script type="text/javascript">
+		//  Definimos la variable GLOBAL, donde se guarda el botón del ratón que se ha pulsado:
+		var boton_raton = 0;
+		
+		window.onload = function() {
+			document.onmousemove = obtenerPosicion;
+			document.onkeypress = obtenerTecla;
+			document.onclick = cambiarColor;
+				
+			document.getElementById("info").onmousedown = inicio_mover;
+			document.getElementById("info").onmouseup = fin_mover;
+		}
+ 
+		function inicio_mover() {
+			boton_raton = 1; 
+			//  Devolvemos false aquí y en fin_mover para que NO seleccione el texto. Para este caso.
+			//  Y tambén mejorar la usabilidad, esto es, no se queda pillado arrastrando la caja.
+			return false;
+		}
+		function fin_mover() {
+			boton_raton = 0; 
+		}
+
+		function cambiarColor() {
+			document.getElementById("info").style.backgroundColor = "#FFFFCC";
+		}
+		
+		function obtenerTecla(elEvento) {
+			var evento = elEvento || window.event;
+			var mensaje = new Array(); 
+			//  Mostramos el Título:
+			mensaje[0] = "Teclado";
+			//  Mostramos el carácter que se ha pulsado:
+			mensaje[1] = "Carácter [" + String.fromCharCode(evento.charCode) + "]";
+			//  Mostramos el código ASCII de la letra que se ha pulsado:
+			mensaje[2] = "Código [" + evento.charCode + "]";
+			
+			//  Cambiamos el Color (azulito):
+			document.getElementById("info").style.backgroundColor = "#CCE6FF";
+				
+			//  Mostramos la Información:
+			muestraInformacion(mensaje);
+		}
+		
+		function obtenerPosicion(elEvento) {
+			//  Cogemos las coordenadas del Navegador:
+			var evento = elEvento || window.event;
+			var mensaje = new Array(); 
+			//  Mostramos el Título:
+			mensaje[0] = "Ratón";
+			//  Cogemos las coordenadas del Navegador
+			mensaje[1] = "Navegador [" + evento.clientX + ", " + evento.clientY + "]";
+			//  Cogemos las coordenadas de la Pantala:
+			mensaje[2] = "Pantalla [" + evento.screenX + ", " + evento.screenY + "]";
+			//  Cogemos las coordenadas de la Página:
+			mensaje[3] = "Página [" + evento.pageX + ", " + evento.pageY + "]";  
+			
+			info = document.getElementById("info");
+			//  Quitamos cualquier color:
+			info.style.backgroundColor = "";
+			
+			//  El meneito:
+			if (boton_raton == 1) {
+					mensaje[4] = "MOVIENDO";
+					info.style.left = evento.clientX + "px";
+					info.style.top = evento.clientY + "px";
+					info.style.backgroundColor = "pink";
+			}
+			//  Mostramos la Información:
+			muestraInformacion(mensaje);
+		}
+
+		function muestraInformacion(mensaje) {
+			document.getElementById("info").innerHTML = '<h1>'+mensaje[0]+'</h1>';
+			for(var i=1; i<mensaje.length; i++) {
+				document.getElementById("info").innerHTML += '<p>'+mensaje[i]+'</p>';
+			}
+		}
+		
+		</script>
+
+	</head>
+
+	<body>
+
+		<div id="info"></div>
+
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+		<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+
+	</body>
+</html>

@@ -1,0 +1,1 @@
+Primer ejemplo de clases en javascript ES6. Definiendo una clase llamada punto.
