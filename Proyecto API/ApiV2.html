@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos de Tienda</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url(fondoTienda.jpg);
+        
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      
+
+      h3 {
+        text-align: center;
+        color: white;
+        margin-top: 20px;
+      }
+
+      .tabla_productos {
+        width: 90%;
+        max-width: 1000px;
+        margin: 20px auto;
+      }
+
+      .tabla_productos th {
+        background-color: #42c96f;
+        color: #ffffff;
+        padding: 12px;
+        border-radius: 8px 8px 0 0;
+      }
+
+      .tabla_productos td {
+        background-color: #e9f5ec;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      #botones {
+        text-align: center;
+        margin: 20px 0;
+      }
+
+      #botones button {
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #ffffff;
+        background-color: #42c96f;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 0 5px;
+      }
+
+      #botones button:disabled {
+        background-color: #b0c4af;
+        cursor: not-allowed;
+      }
+
+      #botones button:hover:not(:disabled) {
+        background-color: #37a85c;
+      }
+
+      #detalleProducto {
+        text-align: center;
+        font-size: 1.1em;
+        margin: 20px auto;
+        padding: 15px;
+        max-width: 600px;
+        background-color: #fff;
+        border-radius: 8px;
+        color: #333;
+      }
+    </style>
+    <script>
+      let paginaActual = 1;
+      const productosPorPagina = 5; // Número de productos por página
+
+      
+      // Función para obtener y mostrar productos de la API
+      function cargarProductos() {
+        fetch(`https://fakestoreapi.com/products`)
+          .then((response) => response.json())
+          .then((data) => {
+            const inicio = (paginaActual - 1) * productosPorPagina;
+            const productosPagina = data.slice(
+              inicio,
+              inicio + productosPorPagina
+            );
+            mostrarProductos(productosPagina);
+            actualizarBotones(data.length);
+          })
+          .catch((error) =>
+            console.error("Error al obtener los productos:", error)
+          );
+      }
+
+      // Función para mostrar productos en la tabla
+      function mostrarProductos(productos) {
+        const cuerpoTabla = document.getElementById("cuerpoTabla");
+        cuerpoTabla.innerHTML = ""; // Limpiar la tabla
+
+        productos.forEach((producto) => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+          <td>${producto.title}</td>
+          <td>${producto.category}</td>
+          <td>$${producto.price.toFixed(2)}</td>
+          <td><button onclick="mostrarDetalle('${
+            producto.description
+          }')">Ver Detalle</button></td>
+        `;
+          cuerpoTabla.appendChild(fila);
+        });
+      }
+
+      // Función para mostrar la descripción del producto seleccionado
+      function mostrarDetalle(descripcion) {
+        const detalleDiv = document.getElementById("detalleProducto");
+        detalleDiv.innerHTML = `
+        <h4>Descripción del Producto</h4>
+        <p>${descripcion}</p>
+      `;
+      }
+
+      // Función para actualizar botones de paginación
+      function actualizarBotones(totalProductos) {
+        document.getElementById("botonAnterior").disabled = paginaActual <= 1;
+        document.getElementById("botonSiguiente").disabled =
+          paginaActual >= Math.ceil(totalProductos / productosPorPagina);
+      }
+
+      // Función para ir a la página siguiente
+      function paginaSiguiente() {
+        paginaActual++;
+        cargarProductos();
+      }
+
+      // Función para ir a la página anterior
+      function paginaAnterior() {
+        if (paginaActual > 1) {
+          paginaActual--;
+          cargarProductos();
+        }
+      }
+
+      // Cargar productos al iniciar la página
+      window.onload = cargarProductos;
+    </script>
+  </head>
+
+  <body>
+    <h3 style="text-align: center">Lista de Productos</h3>
+
+    <!-- Tabla para mostrar productos -->
+    <table id="tablaProductos" class="tabla_productos">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="cuerpoTabla"></tbody>
+    </table>
+
+    <!-- Botones de navegación -->
+    <div id="botones">
+      <button id="botonAnterior" onclick="paginaAnterior()" disabled>
+        Anterior
+      </button>
+      <button id="botonSiguiente" onclick="paginaSiguiente()">Siguiente</button>
+    </div>
+
+    <!-- Detalle del producto seleccionado -->
+    <div id="detalleProducto">
+      Haz clic en "Ver Detalle" para ver más información
+    </div>
+  </body>
+</html>

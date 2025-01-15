@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo Fetch</title>
+
+    <script>
+
+        const obtenerUsuariosP = () => {
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    //console.log("Usuarios listos!");
+                    resolve("Usuarios listos! en resolve");
+                }, 3000);
+            })
+        }
+
+        const obtenerClientesP = () => {
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    //console.log("Clientes listos!");
+                    resolve("Clientes listos! en resolve");
+                }, 2000);
+            })
+        }
+
+
+
+        const obtenerProductosP = () => {
+
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                   // console.log("Productos listos!");
+                    resolve("Productos listos! en resolve");
+                }, 500);
+            })
+        }
+
+        
+        
+        /*
+        obtenerUsuariosP()
+        .then (obtenerClientesP)
+        .then (obtenerProductosP)
+        .catch(err => console.log("error: ",err))
+        */
+
+        let id_grupo = {Javier, Pedro, David, Miguel};
+
+        obtenerUsuariosP(id_grupo) 
+        .then (datos => console.log("Usuarios: ", datos))
+        .then (obtenerClientesP)
+        .then (datos => console.log("Clientes: ", datos))
+        .then (obtenerProductosP)
+        .then (datos => console.log("Productos: ", datos))
+        .catch(err => console.log("error: ",err))
+
+    </script>
+
+</head>
+
+<body>
+    <h1>Ejemplo Fetch</h1>
+</body>
+
+</html>

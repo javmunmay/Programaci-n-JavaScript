@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<style type="text/css">
+		/* TENEMOS QUE DARLE UN TAMAÑO AL DIV QUE CONTIENE EL MAPA. SI NO, NO SE VERÁ  */
+		#divmapa {
+			width: 700px;
+			height: 700px;
+			border: 1px solid blue;
+		}
+	</style>
+
+	<title>API v3 de Google Maps. Ejemplo Básico 3</title>
+
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyA6rLid89W1HGF2lCnQbfx62tr-57ugzdU">
+	</script>
+
+	<script type="text/javascript">
+
+		let lat = 0;
+		let lon = 0;
+
+		window.onload = function () {
+			coordenadas();
+			document.getElementById("btCargarMapa").onclick = function () {
+				CargarMapa(lat, lon);
+			};
+
+		}
+
+		//GEOLOCALIZACIÓN
+		function coordenadas() {
+			var info = document.getElementById("info");
+
+			if (navigator.geolocation) {
+				info.innerHTML = "El navegador SOPORTA la GEOLOCALIZACIÓN";
+				var geo = navigator.geolocation;
+				geo.watchPosition(muestraLoc, muestraErr);
+			} else {
+				info.innerHTML = "Lo Sentimos. El navegador NO SOPORTA la GEOLOCALIZACIÓN";
+			}
+		}
+
+		function muestraLoc(pos) {
+			lat = pos.coords.latitude;
+			lon = pos.coords.longitude;
+
+			document.getElementById("info").innerHTML += "<br />Latitud: " + lat +
+				"<br />Longitud: " + lon;
+		}
+
+		function muestraErr(error) {
+			var errores = {
+				1: 'Permission denied',
+				2: 'Position unavailable',
+				3: 'Request timeout'
+			};
+			document.getElementById("info").innerHTML += "<br /> Ha habido un ERROR. " + errores[error.code];
+		}
+
+
+		//MAPA GOOGLE
+		function CargarMapa() {
+			//  Creamos una referencia al lugar donde vamos a meter el mapa,
+			//    para trabajar más cómodos.
+			var divMapa = document.getElementById("divmapa");
+
+			//  Guardamos la posición (el centro) en una variable:
+			var centro = new google.maps.LatLng(lat, lon);
+
+			//  Creamos las opciones
+			var opciones = {
+				center: centro,
+				zoom: 17,
+				//		mapTypeId: google.maps.MapTypeId.ROADMAP  // es el tipo de mapa por defecto.
+			};
+
+			//  Dibujamos el mapa:
+			var mapa = new google.maps.Map(divMapa, opciones);
+
+
+			//  Le colocamos un marcador:
+			var marcador = new google.maps.Marker({
+				position: centro,
+				map: mapa,
+				title: "IES Velázquez"
+			});
+
+
+			//  Le ponemos una ventanica de información:
+			/*
+			var infowindow = new google.maps.InfoWindow({
+				map: mapa,
+				position: new google.maps.LatLng(37.388288, -5.9834368),
+				content: 'IES Velázquez'
+			});*/
+
+
+
+			let timer;
+			let clickTimeout = 300; // Tiempo en milisegundos para diferenciar entre click y doble click
+
+			// Añadimos el evento click al marcador (AMPLIAR)
+			google.maps.event.addListener(marcador, 'click', function () {
+				// Cancelamos el doble clic si el temporizador está activo
+				clearTimeout(timer);
+
+				// Esperamos un tiempo para ver si es un doble clic
+				timer = setTimeout(function () {
+					// Si solo es un clic, hacemos el zoom
+					mapa.setZoom(mapa.getZoom() + 4);
+					mapa.setCenter(marcador.getPosition());
+				}, clickTimeout);
+			});
+
+			// Añadimos el evento doble clic al marcador (ZOOM ATRÁS)
+			google.maps.event.addListener(marcador, 'dblclick', function () {
+				// Cancela el temporizador del clic, ya que se trata de un doble clic
+				clearTimeout(timer);
+
+				// Si es un doble clic, hacemos el zoom hacia atrás
+				mapa.setZoom(mapa.getZoom() - 4);
+				mapa.setCenter(marcador.getPosition());
+			});
+
+
+
+
+		}
+
+	</script>
+</head>
+
+<body>
+	<h3>API v3 de Google Maps. Ejemplo Básico 3</h3>
+	<h5>En esta versión, le añadimos una ventanica de información.</h5>
+	<p>
+		<button id="btCargarMapa" onclick="CargarMapa()">Cargar Mapa</button>
+
+	</p>
+	<p>
+	<div id="divmapa">
+		Aquí pondremos el mapa
+	</div>
+
+	<div id="info">
+		Aquí pondremos las coordenadas
+	</div>
+
+
+	</p>
+</body>
+
+</html>

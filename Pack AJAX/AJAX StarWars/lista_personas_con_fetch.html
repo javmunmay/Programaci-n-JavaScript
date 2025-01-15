@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Ejercicio Listado Personas. AJAX</title>
+    <style type="text/css">
+        h3 {
+            color: red;
+        }
+
+        /* CSS para el formulario:   */
+        .formPersonas {
+            visibility: hidden;
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            z-index: 11;
+            background-color: pink;
+            border: 2px solid maroon;
+            border-radius: 15px;
+            padding: 1em;
+            color: red;
+
+            /*	opacity:0;   */
+            /*	transition: all 1s;   */
+        }
+
+        .formPersonas div label {
+            display: block;
+            margin-top: .5em;
+        }
+
+        .formPersonas .btn {
+            display: block;
+            margin-top: 1em;
+        }
+
+
+        .ver {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <script type="text/javascript">
+
+const url = 'servidor.php';
+
+window.onload = function () {
+    cargarTabla();
+    document.getElementById("btNuevaPersona").onclick = mostrarForm;
+    document.getElementById("btCancelar").onclick = cancelarForm;
+    document.getElementById("btAnade").onclick = anadePersona;
+}
+
+function Crea_Fila(aCol) {
+    var fila = document.createElement("tr");
+    for (var i in aCol) {
+        let col = document.createElement("td");
+        col.appendChild(document.createTextNode(aCol[i]));
+        fila.appendChild(col);
+    }
+    return fila;
+}
+
+function LlenaTabla(aTabla, cuerpoTabla) {
+    cuerpoTabla.innerHTML = '';
+    aTabla.forEach(item => {
+        let fila = Crea_Fila(item);
+
+        // Botón Borrar
+        let tdBorrar = document.createElement('td');
+        let botonBorrar = document.createElement('button');
+        botonBorrar.innerHTML = "Borrar";
+        botonBorrar.onclick = borrarPersona;
+        botonBorrar.dataset.idpersona = item.ID;
+        botonBorrar.dataset.nombreape = item.NOMBRE + " " + item.APELLIDOS;
+        tdBorrar.appendChild(botonBorrar);
+        fila.appendChild(tdBorrar);
+
+        // Botón Editar
+        let tdEditar = document.createElement('td');
+        let botonEditar = document.createElement('button');
+        botonEditar.innerHTML = "Editar";
+        botonEditar.onclick = editarPersona;
+        botonEditar.dataset.idpersona = item.ID;
+        tdEditar.appendChild(botonEditar);
+        fila.appendChild(tdEditar);
+
+        cuerpoTabla.appendChild(fila);
+    });
+}
+
+function fetchAPI(servicio, data, callback) {
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ servicio, ...data })
+    })
+    .then(response => response.json())
+    .then(data => callback(data))
+    .catch(error => console.error('Error:', error));
+}
+
+function cargarTabla() {
+    fetchAPI("listar", {}, MuestraPersonas);
+}
+
+function MuestraPersonas(datos) {
+    LlenaTabla(datos, document.getElementById("filas_tabla"));
+}
+
+function anadePersona(e) {
+    e.preventDefault();
+    let servicio = (document.getElementById("btAnade").dataset.idpersona == "-1") ? "insertar" : "modificar";
+    let personaData = {
+        id: document.getElementById("btAnade").dataset.idpersona,
+        dni: document.getElementById("dni").value,
+        nombre: document.getElementById("nombre").value,
+        apellidos: document.getElementById("apellidos").value,
+    };
+
+    fetchAPI(servicio, personaData, MuestraPersonas);
+    document.getElementById("btAnade").dataset.idpersona = "-1";
+    cancelarForm();
+}
+
+function borrarPersona(e) {
+    e.preventDefault();
+    if (confirm("¿Deseas eliminar a: '" + this.dataset.nombreape + "'?")) {
+        fetchAPI("borrar", { id: this.dataset.idpersona }, MuestraPersonas);
+    }
+}
+
+function mostrarForm() {
+    document.getElementById("formPersonas").classList.add("ver");
+    let leyenda = (document.getElementById("btAnade").dataset.idpersona == "-1") ? "Añadir" : "Modificar";
+    document.querySelector("#formPersonas legend").innerHTML = leyenda;
+    document.getElementById("btAnade").innerHTML = leyenda;
+}
+
+function cancelarForm() {
+    document.getElementById("formPersonas").classList.remove("ver");
+    document.getElementById("btAnade").dataset.idpersona = "-1";
+    limpiarForm();
+}
+
+function editarPersona(e) {
+    e.preventDefault();
+    fetchAPI("selPersonaID", { id: this.dataset.idpersona }, llenaForm);
+}
+
+function llenaForm(datos) {
+    document.getElementById("dni").value = datos.DNI;
+    document.getElementById("nombre").value = datos.NOMBRE;
+    document.getElementById("apellidos").value = datos.APELLIDOS;
+    document.getElementById("btAnade").dataset.idpersona = datos.ID;
+    mostrarForm();
+}
+
+function limpiarForm() {
+    document.getElementById("dni").value = "";
+    document.getElementById("nombre").value = "";
+    document.getElementById("apellidos").value = "";
+}
+
+    </script>
+</head>
+
+<body>
+    <h3>Registro de Usuarios</h3>
+
+    <div id="formPersonas" class="formPersonas">
+        <fieldset>
+            <legend>Alta en el servicio</legend>
+            <div>
+                <label for="dni">DNI</label>
+                <input type="text" id="dni" size="10" maxlength="9" value="27473339T" />
+            </div>
+            <div>
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" value="Marco Elio" />
+            </div>
+            <div>
+                <label for="apellidos">Apellidos</label>
+                <input type="text" id="apellidos" size="40" value="García Gomariz" />
+            </div>
+            <div class="btn">
+                <button id="btAnade">Añadir </button>
+                <button id="btCancelar">Cancelar </button>
+            </div>
+        </fieldset>
+    </div>
+
+
+
+    <br />
+    <button class="btn" id="btNuevaPersona">Nueva persona</button>
+    <br><br>
+    <table id="tabla_personas" border="1">
+        <tr>
+            <th>ID</th>
+            <th>DNI</th>
+            <th>NOMBRE</th>
+            <th>APELLIDOS</th>
+            <th>Borrar</th>
+            <th>Editar</th>
+        </tr>
+
+        <tbody id="filas_tabla">
+
+        </tbody>
+    </table>
+
+    <br><br>
+
+</body>
+
+</html>

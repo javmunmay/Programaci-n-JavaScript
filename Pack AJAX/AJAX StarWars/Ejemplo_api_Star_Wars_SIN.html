@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Envio de parametros con AJAX externo</title>
+	<style type="text/css">
+		.estilo_Tabla_1 {
+			font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+			width: 70%;
+			border-collapse: collapse;
+		}
+
+		.estilo_Tabla_1 td {
+			font-size: 1em;
+			border: 1px solid #98bf21;
+			padding: 4px;
+		}
+
+		.estilo_Tabla_1 th {
+			border: 1px solid #98bf21;
+			font-size: 1.2em;
+			padding: 5px;
+			background-color: #A7C942;
+			color: #ffffff;
+		}
+
+		.estilo_Tabla_1 tr td {
+			color: #000000;
+
+			background-color: #EAF2D3;
+		}
+
+		caption {
+			caption-side: bottom;
+			color: green;
+		}
+	</style>
+
+	<script type="text/javascript">
+
+		let peticion;//Variable para hacer peticiones
+		
+		let urlPrevious;
+		let urlNext;
+
+		window.onload = () => {
+			peticion = new XMLHttpRequest();
+			
+			peticion.onreadystatechange = pintaPersonajes;
+
+
+			//Realizar petición http
+			
+			console.log("Acabo de hacer la petición");
+
+			peticion.open('GET', 'https://swapi.dev/api/people/?format=json');
+			peticion.send();
+
+			peticion.onreadystatechange = primeraLista; // Por cada cambio realizado, llamar a recibe Personas para mostrar los personajes
+
+
+			//Botones siguiente y anterior
+
+			let botonAnterior = document.createElement("input");
+			botonAnterior.type = "button";
+			botonAnterior.value = "Anterior";
+			document.getElementById("personajes").appendChild(botonAnterior);
+			botonAnterior.onclick = paginaAnterior;
+			
+
+			let botonNext = document.createElement("input");
+			botonNext.type = "button";
+			botonNext.value = "Siguiente";
+			document.getElementById("personajes").appendChild(botonNext);
+			botonNext.onclick = siguientePagina;
+
+			
+			
+
+			//document.getElementById("tr").innerHTML=`<button onclick="siguientePagina">Siguente</button>`;
+
+
+
+
+
+		}
+
+
+		const pintaPersonajes = () => {
+			if (peticion.readyState == 4) {
+				if (peticion.status == 200) {
+					console.log(peticion.responseText);
+					// Aquí metemos el código para poner las provincias en el select
+
+
+					let resp = JSON.parse(peticion.responseText);
+					let personajes = resp.results;
+					console.log("resp: ", resp.results);
+
+					let tbody = document.getElementById("cuerpoPersonajes");
+
+					tbody.innerHTML="";
+
+					personajes.forEach(personaje => {
+						let fila = document.createElement("tr");
+
+						fila.innerHTML = `
+						<td>${personaje.name}</td>
+						<td>${personaje.height}</td>
+						<td>${personaje.mass}</td>
+						<td>${personaje.birth_year}</td>
+						<td>${personaje.gender}</td>
+						<td><button onclick="obtenerPlaneta('${personaje.homeworld}')">Ver planeta</button></td>
+						
+						`;
+
+						tbody.appendChild(fila);
+
+
+					});
+				}
+			}
+		}
+
+
+
+		const obtenerPlaneta = (urlPlaneta) => {
+			let peticionPlaneta = new XMLHttpRequest();
+			peticionPlaneta.onreadystatechange = function () {
+				if (peticionPlaneta.readyState == 4) {
+					if (peticionPlaneta.status == 200) {
+						console.log(peticionPlaneta.responseText);
+						// Aquí metemos el código para poner las provincias en el select
+
+
+						let planeta = JSON.parse(peticionPlaneta.responseText);
+						document.getElementById("datosPlaneta").innerHTML = `Datos del planeta: ${planeta.name}, Clima: ${planeta.climate}, Terreno: ${planeta.terrain}`;
+
+					}
+				}
+			};
+
+			peticionPlaneta.open('GET', urlPlaneta);
+			peticionPlaneta.send();
+
+
+		}
+
+
+		const primeraLista = () => { // Función para mostrar el listado de personajes
+			if (peticion.readyState == 4 && peticion.status == 200) { // .readyState === 4 para asegurar que la solicitud ha sido completada y .status === 200 para asegurar que se recibe una respuesta correcta del servidor
+				respuesta = JSON.parse(peticion.responseText); // Guardar en una variable parseada a JSON la peticion.responseText
+				let personajes = respuesta.results; // Del campo Results, guardar en un array el listado
+				urlNext = respuesta.next; // Guardar el siguiente enlace en la variable urlNext global
+				urlPrevious = respuesta.previous; // Guardar el anterior enlace en la variable urlPrevious global
+				// console.log(urlNext);
+
+				pintaPersonajes(personajes);
+			}
+		}
+
+		const siguientePagina = () => {
+			peticion = new XMLHttpRequest();
+			peticion.open('GET', urlNext); // Enviar la solicitud con el njuevo enlace al siguiente listado de personajes
+			peticion.send();
+
+			peticion.onreadystatechange = function () {
+				if (peticion.readyState == 4 && peticion.status == 200) {
+					let respuesta = JSON.parse(peticion.responseText); // Guardar en una variable parseada a JSON la peticion.responseText
+					let personajes = respuesta.results; // Del campo Results, guardar en un array el listado
+
+					urlPrevious = respuesta.previous; // Guardar el anterior enlace en la variable urlPrevious global
+					urlNext = respuesta.next; // Guardar el siguiente enlace en la variable urlNext global
+					//console.log(urlPrevious);
+					//console.log(urlNext);
+
+					pintaPersonajes(personajes);
+				}
+			}
+		}
+
+		const paginaAnterior = () => {
+			let peticion = new XMLHttpRequest();
+			peticion.open('GET', urlPrevious); // Enviar la solicitud con el nuevo enlace al anterior listado de personajes
+			peticion.send();
+
+			peticion.onreadystatechange = function () {
+				if (peticion.readyState == 4 && peticion.status == 200) {
+					let respuesta = JSON.parse(peticion.responseText); // Guardar en una variable parseada a JSON la peticion.responseText
+					let personajes = respuesta.results; // Del campo Results, guardar en un array el listado
+
+					urlPrevious = respuesta.previous;
+					urlNext = respuesta.next;
+
+					//console.log(urlPrevious);
+					//console.log(urlNext);
+
+					pintaPersonajes(personajes);
+				}
+			}
+		}
+
+
+
+
+
+
+
+
+	</script>
+</head>
+
+<body>
+	<h3>Ejemplo de llamada a la API de STAR WARS</h3>
+
+
+	<p>
+	<table id="personajes" class="estilo_Tabla_1">
+		<caption>Personajes STAR WARS</caption>
+		<thead>
+			<tr>
+				<th>Nombre</th>
+				<th>Altura</th>
+				<th>Peso</th>
+				<th>Nacimiento</th>
+				<th>Género</th>
+				<th>Homeworld</th>
+			</tr>
+		</thead>
+		<tbody id="cuerpoPersonajes">
+
+		</tbody>
+	</table>
+	</p>
+
+	<br />
+	<div id="datosPlaneta">Datos del planeta:</div>
+</body>
+
+</html>

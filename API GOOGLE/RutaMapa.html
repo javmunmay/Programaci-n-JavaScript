@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<style type="text/css">
+		/* TENEMOS QUE DARLE UN TAMAÑO AL DIV QUE CONTIENE EL MAPA. SI NO, NO SE VERÁ  */
+		#divmapa {
+			width: 700px;
+			height: 700px;
+			border: 1px solid blue;
+		}
+	</style>
+	<title>API v3 de Google Maps. Ejemplo Básico</title>
+	<script type="text/javascript"
+		src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6rLid89W1HGF2lCnQbfx62tr-57ugzdU">
+		</script>
+	<script type="text/javascript">
+		// Variables globales
+		let directionsDisplay;
+		let directionsService;
+		let mapa;
+
+		window.onload = function () {
+			document.getElementById("btcalcular").addEventListener("click", calcularRuta);
+			cargarMapa();
+		};
+
+		// Inicializar el mapa
+		function cargarMapa() {
+			const divMapa = document.getElementById("divmapa");
+			const centro = new google.maps.LatLng(37.388288, -5.9834368); // Coordenadas iniciales (IES Velázquez)
+			const opciones = {
+				center: centro,
+				zoom: 10,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+
+			// Crear el mapa
+			mapa = new google.maps.Map(divMapa, opciones);
+
+			// Crear el marcador
+			const marcador = new google.maps.Marker({
+				position: centro,
+				map: mapa,
+				title: "IES Velázquez"
+			});
+
+			// Ventana de información
+			const infowindow = new google.maps.InfoWindow({
+				content: "IES Velázquez"
+			});
+
+			marcador.addListener("click", function () {
+				infowindow.open(mapa, marcador);
+			});
+
+			// Inicializar servicios de rutas
+			directionsDisplay = new google.maps.DirectionsRenderer();
+			directionsService = new google.maps.DirectionsService();
+			directionsDisplay.setMap(mapa);
+		}
+
+		// Calcular la ruta
+		function calcularRuta() {
+			const origen = document.getElementById("origen").value;
+			const destino = document.getElementById("destino").value;
+
+			if (!origen || !destino) {
+				alert("Por favor, introduce origen y destino.");
+				return;
+			}
+
+			const request = {
+				origin: origen,
+				destination: destino,
+				travelMode: google.maps.TravelMode.DRIVING // Modo de transporte
+			};
+
+			directionsService.route(request, function (result, status) {
+				if (status === google.maps.DirectionsStatus.OK) {
+					directionsDisplay.setDirections(result);
+				} else {
+					alert("No se pudo calcular la ruta: " + status);
+				}
+			});
+		}
+	</script>
+</head>
+
+<body>
+	<h3>Ejemplo para crear una ruta con Google Maps</h3>
+	<p>
+		<label>Origen: </label>
+		<input type="text" id="origen" value="Sevilla">
+		<label>Destino: </label>
+		<input type="text" id="destino" value="Madrid">
+		<button id="btcalcular">Crear Ruta</button>
+	</p>
+	<div id="divmapa">
+		<!-- El mapa se renderizará aquí -->
+	</div>
+</body>
+
+</html>

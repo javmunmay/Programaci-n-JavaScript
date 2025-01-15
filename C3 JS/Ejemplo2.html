@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- Cargar c3.css -->
+    <link rel="stylesheet" href="c3-0.7.20/c3.css">
+    <!-- Cargar d3.js y c3.js -->
+    <script src="c3-0.7.20/docs/js/d3-5.8.2.min.js"></script>
+    <script src="c3-0.7.20/c3.min.js"></script>
+
+
+    <style type="text/css">
+        #divmapa {
+            width: 700px;
+            height: 700px;
+            border: 1px solid blue;
+        }
+    </style>
+    <script type="text/javascript"
+        src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyA6rLid89W1HGF2lCnQbfx62tr-57ugzdU">
+        </script>
+
+    <script type="text/javascript">
+
+        let datos = [
+            ['Altitud', 30, 200, 100, 400, 150, 250],
+            ['data2', 50, 20, 10, 40, 15, 25]
+        ]
+
+
+        window.onload = () => {
+            document.getElementById("id_fichero").addEventListener('change', Leer_Fichero, false);
+            
+            pintaGrafico();
+        }
+
+        function pintaGrafico() {
+            let chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    columns: datos
+                }
+            });
+        }
+
+
+
+        /* Pasar archivo a xml */
+
+        function Leer_Fichero(evento) {
+            var e = evento || window.event;
+            var fichero = e.target.files[0];
+
+            function Convertir_a_XML(texto) {
+                var xml = null;
+                if (window.ActiveXObject) {
+                    xml = new ActiveXObject("Microsoft.XMLDOM");
+                    xml.loadXML(texto);
+                } else {
+                    xml = new DOMParser().parseFromString(texto, "text/xml");
+                }
+                return xml;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                let miXml = Convertir_a_XML(reader.result);
+                cargarMapa(miXml);
+            }
+            reader.readAsText(fichero);
+        }
+
+        function cargarMapa(xml) {
+            var puntos = xml.getElementsByTagName("trkpt");
+            alert("número de puntos: " + puntos.length);
+
+            var micasa = new google.maps.LatLng(puntos[0].getAttribute("lat"), puntos[0].getAttribute("lon"));
+            var opcionesMapa = {
+                zoom: 15,
+                center: micasa
+            }
+            var mapa = new google.maps.Map(document.getElementById("divmapa"), opcionesMapa);
+
+            var ruta = [];
+            var distanciaTotal = 0;
+            var tiempoTotal = 0;
+
+            for (var i = 0; i < puntos.length; i++) {
+                var latitud = puntos[i].getAttribute("lat");
+                var longitud = puntos[i].getAttribute("lon");
+                var punto = new google.maps.LatLng(latitud, longitud);
+                ruta.push(punto);
+
+                if (i > 0) {
+                    distanciaTotal += google.maps.geometry.spherical.computeDistanceBetween(ruta[i - 1], punto);
+
+                    // Calcular el tiempo entre puntos si existe la etiqueta <time>
+                    var tiempoPrevio = new Date(puntos[i - 1].getElementsByTagName("time")[0].textContent).getTime();
+                    var tiempoActual = new Date(puntos[i].getElementsByTagName("time")[0].textContent).getTime();
+                    tiempoTotal += (tiempoActual - tiempoPrevio) / 1000; // Convertir a segundos
+                }
+            }
+
+
+            var velocidad = (distanciaTotal / 1000) / (tiempoTotal / 3600);
+
+            document.getElementById("sal").innerHTML =
+                "Distancia total: " + (distanciaTotal / 1000).toFixed(2) + " km<br>" +
+                "Duración total: " + (tiempoTotal > 3600
+                    ? (tiempoTotal / 3600).toFixed(2) + " horas"
+                    : (tiempoTotal / 60).toFixed(0) + " minutos") + "<br>" +
+                "Velocidad promedio: " + velocidad.toFixed(2) + " km/h";
+
+            new google.maps.Polyline({
+                path: ruta,
+                map: mapa,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2,
+                clickable: true
+            });
+
+            var marcadorSalida = new google.maps.Marker({
+                position: ruta[0],
+                map: mapa,
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    strokeColor: "green",
+                    scale: 5
+                },
+                title: "Salida"
+            });
+
+            var marcadorLlegada = new google.maps.Marker({
+                position: ruta[ruta.length - 1],
+                map: mapa,
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    strokeColor: "red",
+                    scale: 5
+                },
+                title: "Llegada"
+            });
+        }
+
+        
+
+
+    </script>
+
+</head>
+
+<body>
+
+    <label for="id_fichero">Selecciona el fichero a leer:</label><br>
+    <input id="id_fichero" type="file" />
+    <p>
+    <div id="sal">
+        Aquí pongo el contenido del fichero!!!
+    </div>
+    </p>
+
+    <p>
+    <div id="divmapa">
+        Aquí pondremos el mapa
+    </div>
+    </p>
+
+    <p>
+    <div id="chart"></div>
+
+    </p>
+</body>
+
+</html>

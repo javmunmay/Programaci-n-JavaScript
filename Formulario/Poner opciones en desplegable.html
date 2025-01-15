@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <script type="text/javascript">
+
+        window.onload = function() {
+
+            
+
+            var select = document.getElementById("seleccion");
+            
+            for (var i = 1; i <= 10; i++) {
+                var opcionNueva = document.createElement("option");
+                opcionNueva.value = i; // Establece el valor de la opción
+                opcionNueva.textContent = "Opción " + i; // Texto que se mostrará
+                select.appendChild(opcionNueva); // Añade la opción al select
+            }
+        }
+
+    </script>
+
+
+
+</head>
+<body>
+    <h3>Ejercicio para rellenar un select</h3>
+
+    <label for="select">Select genérico: </label>
+    <select id="seleccion">
+
+
+    </select>
+
+</body>
+</html>

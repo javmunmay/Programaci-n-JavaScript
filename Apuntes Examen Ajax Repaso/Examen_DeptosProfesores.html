@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Examen 1ª Evaluación DWEC</title>
+	<style>
+		h3 {
+			color: red;
+		}
+
+		/* CSS para el formulario:   */
+		.formProfes {
+			visibility: hidden;
+			position: absolute;
+			top: 20%;
+			left: 20%;
+			z-index: 11;
+			background-color: pink;
+			border: 2px solid maroon;
+			border-radius: 15px;
+			padding: 1em;
+			color: red;
+		}
+
+		.formProfes div label {
+			display: block;
+			margin-top: .5em;
+		}
+
+		.formProfes .btn {
+			display: block;
+			margin-top: 1em;
+		}
+
+
+		.ver {
+			visibility: visible;
+		}
+
+
+		#deptoDelProfe {
+			font-family: "Lucida Console", "Courier New", monospace;
+			font-size: 1.2em;
+			font-weight: bold;
+			color: blue;
+		}
+	</style>
+	<script type="text/javascript">
+
+		//Variables globales
+		let urlServer = 'deptosProfes.php';
+		let objeto = new Object();
+		let peticion;
+		//let global1;
+
+		window.onload = () => {
+			var botonModificar = document.createElement("button");
+			botonModificar.id = "btModificar";
+			botonModificar.type = "button";
+			botonModificar.textContent = "Modificar";
+			document.querySelector("#formProfes fieldset div.btn").appendChild(botonModificar);
+			rellenaDepart(urlServer);
+			
+			//añado las funciones a los botones
+			document.querySelector("#btNuevoDepto").onclick = annadirDept; 
+			document.querySelector("#btCancelarDepto").onclick = cerrarForm_depart;
+			document.querySelector("#btCancelar").onclick = cerrarFormm_profe; 
+
+		}
+
+		const rellenaDepart = (urlServidor) => {
+			objeto.servicio = "departamentos";
+			let paramObje = {
+				method: "POST",
+				body: JSON.stringify(objeto)
+			}
+			//console.
+			//utilizando fetch con .then
+			fetch(urlServidor, paramObje).then(function (datos) {
+				return datos.json(); 
+			}).then(function (respuesta) {
+				
+				mostrarDepart(respuesta); 
+			});
+		}
+
+
+		const annadirDept = () => { 
+			document.querySelector("#nombreDepto").value = ""; //limpio el valor del nombre del departamento
+			document.querySelector("#descripcion").value = ""; //limpio el valor de la descripción del departamento
+
+			abrirFormDptos();
+
+			document.querySelector("#btAnadeDepto").onclick = function () {	
+				objeto.servicio = "anadeDepto";
+				objeto.nombre = document.querySelector("#nombreDepto").value;
+				objeto.descripcion = document.querySelector("#descripcion").value;
+				let paramObje = {
+					method: "POST",
+					body: JSON.stringify(objeto)
+				}
+
+				fetch(urlServer, paramObje).then(function (datos) { 
+					//uso la promesa cogiendolo con .then usando fetch
+					return datos.json(); 
+				}).then(function (respuesta) {
+					mostrarDepart(respuesta); 
+				});
+				cerrarForm_depart();
+			}
+		}
+
+
+		const mostrarDepart = (respuesta) => {
+			//Variables para mostrar el departamento
+			let listaDepart = respuesta;
+			let dentroTabla = document.querySelector("#detalle_departamentos");
+			dentroTabla.textContent = ""; //Limpio la info
+
+			//forEach dentro del departamento
+			listaDepart.forEach(depart => { 
+				let fila = document.createElement("tr");
+
+				let id_celda = document.createElement("td");
+				id_celda.textContent = depart.id;
+
+				let nombre_celda = document.createElement("td");
+				nombre_celda.textContent = depart.nombre;
+
+				let descripcion_celda = document.createElement("td");
+				descripcion_celda.textContent = depart.descripcion;
+
+				let boton_celda = document.createElement("td");
+				let boton_accion = document.createElement("button")
+				boton_accion.textContent = "Ver los Profes";
+				boton_accion.type = "button"; //Tipo del elemento boton
+				boton_accion.onclick = function () {
+					pintaLista_profes(depart.id); 
+					mostrarNombre_depart(depart.nombre); 
+				}
+				boton_celda.appendChild(boton_accion);
+
+				fila.appendChild(id_celda);
+				fila.appendChild(nombre_celda);
+				fila.appendChild(descripcion_celda);
+				fila.appendChild(boton_celda);
+
+				dentroTabla.appendChild(fila);
+			});
+
+		}
+		
+
+		const pintaLista_profes = (id_departamento) => { 
+			objeto.servicio = "profesores";
+			objeto.id_departamento = id_departamento;
+
+			let paramObje = {
+				method: "POST",
+				body: JSON.stringify(objeto)
+			}
+
+			//fetch con .then
+			fetch(urlServer, paramObje).then(function (datos) { 
+				
+				return datos.json(); 
+			}).then(function (respuesta) {
+				
+				mostrarLista_profes(respuesta); 
+			});
+		}
+		
+		//Al eliminar al profesor cierra la tabla , aun así, Sí elimina al profesor 
+		const eliminar_profesor = (idProfesor, idDepartamento) => { 
+			if (confirm("¿Quieres eliminar al profesor?")) {
+				objeto.servicio = "eliminaProfe";
+				objeto.id = idProfesor;
+				objeto.id_departamento = idDepartamento;
+				
+				let paramObje = {
+					method: "POST",
+					body: JSON.stringify(objeto)
+				}
+				//Aqui lo mismo fetch con promesa cogiendo el .then
+				fetch(urlServer, paramObje).then(function (datos) { 
+					return datos.json(); 
+				}).then(function (respuesta) {
+					mostrarLista_profes(respuesta); 
+				});
+			}
+		}
+
+		const mostrarLista_profes = (respuesta) => { 
+			
+			let listProfes = respuesta;
+
+			let dentro_tabla = document.querySelector("#detalle_profesores");
+			dentro_tabla.textContent = ""; //Limpia el contenido
+
+			listProfes.forEach(profes => {
+				let fila = document.createElement("tr");
+
+				let id_celda = document.createElement("td");
+				id_celda.textContent = profes.id;
+
+				let dni_celda = document.createElement("td");
+				dni_celda.textContent = profes.dni;
+
+				let nombre_celda = document.createElement("td");
+				nombre_celda.textContent = profes.nombre;
+
+				let apellidos_celda = document.createElement("td");
+				apellidos_celda.textContent = profes.apellidos;
+
+				let eliminar_celda = document.createElement("td");
+				let btn_eliminar = document.createElement("button");
+
+				eliminar_celda.appendChild(btn_eliminar);
+				btn_eliminar.textContent = "Eliminar";
+
+				btn_eliminar.type = "button"; //pongo el boton eliminar profe de tipo boton
+				btn_eliminar.onclick = function () {
+					eliminar_profesor(profes.id, profes.nombre, profes.apellidos, profes.id_departamento);
+				}
+
+				let editar_celda = document.createElement("td");
+				let btn_editar = document.createElement("button");
+				editar_celda.appendChild(btn_editar);
+				btn_editar.textContent = "Editar";
+				btn_editar.type = "button";
+				
+				btn_editar.onclick = function () {
+					MOD_profe(profes.id, profes.dni, profes.nombre, profes.apellidos);
+				}
+
+				fila.appendChild(id_celda);
+				fila.appendChild(dni_celda);
+				fila.appendChild(nombre_celda);
+				fila.appendChild(apellidos_celda);
+				fila.appendChild(eliminar_celda);
+				fila.appendChild(editar_celda);
+
+				dentro_tabla.appendChild(fila);
+			});
+		}
+
+
+		const MOD_profe = (idProfesor, dniProfesor, nombreProfesor, apellidosProfesor) => {
+			
+			document.querySelector("#dni").value = dniProfesor;
+			document.querySelector("#nombre").value = nombreProfesor;
+			document.querySelector("#apellidos").value = apellidosProfesor;
+
+			document.querySelector("#formProfes fieldset legend").textContent = "Modificar profe";
+
+			abrirFormProfes();
+
+			document.querySelector("#btModificar").onclick = () => {
+				objeto.servicio = "modificaProfe";
+				objeto.id = idProfesor;
+				objeto.dni = document.querySelector("#dni").value;
+				objeto.nombre = document.querySelector("#nombre").value;
+				objeto.apellidos = document.querySelector("#apellidos").value;
+				let paramObje = {
+					method: "POST",
+					body: JSON.stringify(objeto)
+				}
+
+				//Aqui lo mismo fetch con promesa cogiendo el .then
+				fetch(urlServer, paramObje).then(function (datos) { 
+			
+					return datos.json(); 
+				}).then(function (respuesta) {
+					
+					mostrarLista_profes(respuesta); 
+				});
+
+				//Cierra el formulario de Profe
+				cerrarFormm_profe();
+				document.querySelector("div.formProfes fieldset legend").textContent = "Alta en departamento";
+			}
+		}
+
+		const mostrarNombre_depart = (nombreDepartamento) => { 
+			let nombreDpto = document.querySelector("#deptoDelProfe");
+			nombreDpto.textContent = nombreDepartamento;
+		}
+		const abrirFormProfes = () => { 
+			document.querySelector("#formProfes").style.visibility = "visible";
+			//btAnade para que no aparezca cuando se modifica
+			document.getElementById("btAnade").style.visibility = "hidden"
+		}
+
+		const cerrarFormm_profe = () => { 
+			document.querySelector("#formProfes").style.visibility = "hidden";
+		}
+
+		const abrirFormDptos = () => { 
+			document.querySelector("#formDeptos").style.visibility = "visible";
+		}
+
+		const cerrarForm_depart = () => { 
+			document.querySelector("#formDeptos").style.visibility = "hidden";
+		}
+
+		
+
+	</script>
+</head>
+
+<body>
+	<h1>Registro de Usuarios</h1>
+	<form>
+		<br>
+		<button class="btn" id="btNuevoDepto" type="button">Nuevo Departamento</button>
+		<p>
+		<div id="departamentos">
+			<table border="1">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>NOMBRE</th>
+						<th>DESCRIPCION</th>
+						<th>Acción</th>
+					</tr>
+				</thead>
+
+				<tbody id="detalle_departamentos">
+
+				</tbody>
+
+
+			</table>
+		</div>
+		</p>
+
+
+		<div id="formDeptos" class="formProfes">
+			<fieldset>
+				<legend>Nuevo Departamento</legend>
+				<div>
+					<label for="nombreDepto">Nombre</label>
+					<input type="text" id="nombreDepto" />
+				</div>
+
+				<div>
+					<label for="descripcion">Descripcion</label>
+					<textarea id="descripcion"></textarea>
+				</div>
+				<div class="btn">
+					<button id="btAnadeDepto" type="button">Añadir </button>
+					<button id="btCancelarDepto" type="button">Cancelar </button>
+				</div>
+			</fieldset>
+		</div>
+
+
+		<br />
+		<br />
+		Tabla de Profesores. Departamento de <span id="deptoDelProfe"></span>:
+		<br><br>
+		<button class="btn" id="btNuevaProfe" type="button">Nueva profe</button>
+
+		<p>
+		<div id="profesores">
+			<table border="1">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>DNI</th>
+						<th>NOMBRE</th>
+						<th>APELLIDOS</th>
+						<th>Eliminar</th>
+						<th>Editar</th>
+					</tr>
+				</thead>
+
+				<tbody id="detalle_profesores">
+
+				</tbody>
+
+
+			</table>
+		</div>
+		</p>
+
+
+		<div id="formProfes" class="formProfes">
+			<fieldset>
+				<legend>Alta en el servicio</legend>
+				<div>
+					<label for="dni">DNI</label>
+					<input type="text" id="dni" size="10" maxlength="9" />
+				</div>
+				<div>
+					<label for="nombre">Nombre</label>
+					<input type="text" id="nombre" />
+				</div>
+				<div>
+					<label for="apellidos">Apellidos</label>
+					<input type="text" id="apellidos" size="40" />
+				</div>
+				<div class="btn">
+					<button id="btAnade" type="button" data-idprofe="-1">Añadir </button>
+					<button id="btCancelar" type="button">Cancelar </button>
+				</div>
+			</fieldset>
+		</div>
+
+	</form>
+
+</body>
+
+</html>

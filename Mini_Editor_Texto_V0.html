@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Procesador de Textos</title>
+
+	<style type="text/css">
+		#texto {
+			width: 700px;
+			height: 500px;
+			border: 1px solid blue;
+			padding: 0.4em;
+		}
+
+		span {
+			border: 2px solid red;
+			margin: 1.1em;
+			padding: .2em;
+			cursor: pointer;
+			background-color: pink;
+		}
+	</style>
+
+	<script type="text/javascript">
+		window.onload = () => {
+			// Añadir las funciones a los botones
+			document.querySelector("#negrita").addEventListener("mousedown", ponerNegrita);
+			document.querySelector("#cursiva").addEventListener("mousedown", ponerCursiva);
+			document.querySelector("#subrayado").addEventListener("mousedown", ponerSubrayado);
+			document.querySelector("#color").addEventListener("mousedown", ponerColor);
+			document.querySelector("#guardar").onclick = guardarDato;
+
+			// Cargar etiquetas almacenadas al iniciar la página
+			cargarOpciones();
+
+			// Mostrar el contenido de la etiqueta seleccionada
+			document.querySelector("#info").onchange = mostrarDato;
+		};
+
+		function ponerNegrita(e) {
+			document.execCommand('bold', false, null);
+			e.preventDefault();
+		}
+
+		function ponerCursiva(e) {
+			document.execCommand('italic', false, null);
+			e.preventDefault();
+		}
+
+		function ponerSubrayado(e) {
+			document.execCommand('underline', false, null);
+			e.preventDefault();
+		}
+
+		function ponerColor(e) {
+			document.execCommand('forecolor', false, "#ff0000");
+			e.preventDefault();
+		}
+
+		function guardarDato() {
+			var etiqueta = document.getElementById("etiqueta").value.trim();
+			var dato = document.getElementById("texto").innerHTML.trim();
+
+			if (etiqueta.length === 0 || dato.length === 0) {
+				alert("Nombre o contenido vacío, por favor complete ambos campos");
+				return;
+			}
+
+			// Guardar la etiqueta y el dato en localStorage
+			localStorage.setItem(etiqueta, dato);
+
+			// Actualizar el desplegable con la nueva etiqueta
+			cargarOpciones();
+		}
+
+		function cargarOpciones() {
+			var select = document.getElementById("info");
+			select.innerHTML = ""; // Limpiar opciones actuales
+
+			// Cargar etiquetas de localStorage al desplegable
+			for (let i = 0; i < localStorage.length; i++) {
+				let key = localStorage.key(i);
+				let option = document.createElement("option");
+				option.value = key;
+				option.textContent = key;
+				select.appendChild(option);
+			}
+		}
+
+		function mostrarDato() {
+			var etiquetaSeleccionada = document.getElementById("info").value;
+			var dato = localStorage.getItem(etiquetaSeleccionada);
+
+			if (dato !== null) {
+				document.getElementById("texto").innerHTML = dato;
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<h3>Procesador de Textos</h3>
+	<label>Nombre: </label>
+	<input type="text" name="etiqueta" id="etiqueta">
+	<select name="info" id="info"></select>
+	<br><br>
+	<p>
+		<span id="guardar">Guardar</span>
+		<span id="negrita">Negrita</span>
+		<span id="cursiva">Cursiva</span>
+		<span id="subrayado">Subrayado</span>
+		<span id="color">Color</span>
+	</p>
+	<div id="texto" contentEditable="true" spellcheck="true">
+		Esto es un texto de prueba para no tener que estar escribiendo.
+	</div>
+	<p id="sal"></p>
+
+</body>
+
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altitudes y Mapa</title>
+    <style type="text/css">
+        #divmapa {
+            width: 700px;
+            height: 500px;
+            border: 1px solid blue;
+            margin-bottom: 20px;
+        }
+
+        #chart {
+            width: 700px;
+            height: 500px;
+        }
+    </style>
+    <script type="text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyA6rLid89W1HGF2lCnQbfx62tr-57ugzdU">
+    </script>
+    <link href="c3-0.7.20/c3.css" rel="stylesheet">
+    <script src="c3-0.7.20/docs/js/d3-5.8.2.min.js"></script>
+    <script src="c3-0.7.20/c3.min.js"></script>
+    <script type="text/javascript">
+        var altitudes = []; // Array para guardar las altitudes
+
+        function Leer_Fichero(evento) {
+            var e = evento || window.event;
+            var fichero = e.target.files[0];
+
+            function Convertir_a_XML(texto) {
+                var xml = null;
+                if (window.ActiveXObject) {
+                    xml = new ActiveXObject("Microsoft.XMLDOM");
+                    xml.loadXML(texto);
+                } else {
+                    xml = new DOMParser().parseFromString(texto, "text/xml");
+                }
+                return xml;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                let miXml = Convertir_a_XML(reader.result);
+                procesarAltitudes(miXml);
+                cargarMapa(miXml);
+            };
+            reader.readAsText(fichero);
+        }
+
+        function cargarMapa(xml) {
+            var puntos = xml.getElementsByTagName("trkpt");
+            if (puntos.length === 0) {
+                alert("No se encontraron puntos en el archivo GPX.");
+                return;
+            }
+
+            var micasa = new google.maps.LatLng(puntos[0].getAttribute("lat"), puntos[0].getAttribute("lon"));
+            var opcionesMapa = {
+                zoom: 15,
+                center: micasa
+            };
+            var mapa = new google.maps.Map(document.getElementById("divmapa"), opcionesMapa);
+
+            var ruta = [];
+            for (var i = 0; i < puntos.length; i++) {
+                var latitud = puntos[i].getAttribute("lat");
+                var longitud = puntos[i].getAttribute("lon");
+                var punto = new google.maps.LatLng(latitud, longitud);
+                ruta.push(punto);
+            }
+
+            new google.maps.Polyline({
+                path: ruta,
+                map: mapa,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2,
+                clickable: false
+            });
+
+            new google.maps.Marker({
+                position: ruta[0],
+                map: mapa,
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    strokeColor: "green",
+                    scale: 5
+                },
+                title: "Inicio"
+            });
+
+            new google.maps.Marker({
+                position: ruta[ruta.length - 1],
+                map: mapa,
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    strokeColor: "red",
+                    scale: 5
+                },
+                title: "Fin"
+            });
+        }
+
+        function procesarAltitudes(xml) {
+            var puntos = xml.getElementsByTagName("trkpt");
+            altitudes = []; // Reiniciar array de altitudes
+
+            for (var i = 0; i < puntos.length; i++) {
+                var altitud = parseFloat(puntos[i].getElementsByTagName("ele")[0].textContent);
+                altitudes.push(altitud);
+            }
+
+            document.getElementById("sal").innerHTML =
+                "Número de puntos: " + puntos.length + "<br>" +
+                "Altura máxima: " + Math.max(...altitudes) + " m<br>" +
+                "Altura mínima: " + Math.min(...altitudes) + " m";
+
+            pintarGrafico();
+        }
+
+        function pintarGrafico() {
+            var chart = c3.generate({
+                bindto: '#chart',
+                data: {
+                    columns: [
+                        ['Altitud'].concat(altitudes)
+                    ],
+                    types: {
+                        Altitud: 'line'
+                    }
+                },
+                axis: {
+                    y: {
+                        label: 'Altitud (m)',
+                    }
+                }
+            });
+        }
+
+        window.onload = function () {
+            document.getElementById("id_fichero").addEventListener('change', Leer_Fichero, false);
+        };
+    </script>
+</head>
+
+<body>
+    <p>
+        <label for="id_fichero">Selecciona el fichero GPX para leer altitudes:</label><br>
+        <input id="id_fichero" type="file" />
+    </p>
+
+    <p>
+    <div id="sal">
+        Aquí se mostrará la información de altitudes.
+    </div>
+    </p>
+
+    <p>
+    <div id="divmapa">
+        Aquí se mostrará el mapa.
+    </div>
+    </p>
+
+    <p>
+    <div id="chart">
+        <!-- El gráfico de altitudes se mostrará aquí -->
+    </div>
+    </p>
+</body>
+
+</html>

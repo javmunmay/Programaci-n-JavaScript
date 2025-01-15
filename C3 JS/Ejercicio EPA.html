@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio Datos EPA</title>
+
+    <link href="c3-0.7.20/c3.css" rel="stylesheet">
+    <script src="c3-0.7.20/docs/js/d3-5.8.2.min.js"></script>
+    <script src="c3-0.7.20/c3.min.js"></script>
+
+
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            let xmlDoc = null;
+            let chart = null;
+
+            // Función para leer el archivo XML cargado
+            document.getElementById('id_fichero').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) {
+                    alert('Por favor selecciona un archivo.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const parser = new DOMParser();
+                    xmlDoc = parser.parseFromString(e.target.result, 'application/xml');
+                    if (xmlDoc.querySelector('parsererror')) {
+                        alert('Error al cargar el archivo XML. Asegúrate de que sea válido.');
+                        return;
+                    }
+                    populateOptions(); // Llenar el selector de opciones
+                };
+                reader.readAsText(file);
+            });
+
+            function populateOptions() {
+                const select = document.getElementById('opciones');
+                const keys = [,'ocupados', 'parados', 'tasa_actividad', 'tasa_paro'];
+
+                select.innerHTML = '';
+
+                keys.forEach(key => {
+                    const elements = xmlDoc.querySelectorAll(key);
+                    if (elements.length > 0) { 
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                        select.appendChild(option);
+                    }
+                });
+
+                if (select.options.length > 0) {
+                    renderChart(select.options[0].value); // Renderizar la primera opción
+                } else {
+                    alert('No se encontraron datos válidos en el archivo XML.');
+                }
+            }
+
+            // Función para extraer datos de una serie específica
+            function getSeriesData(seriesName) {
+                const trimestres = [...xmlDoc.querySelectorAll('trimestre')].map(t => t.textContent);
+                const series = [...xmlDoc.querySelectorAll(seriesName)].map(s => parseFloat(s.textContent));
+
+                // Asegurarse de que los datos estén en orden correcto
+                return {
+                    trimestres: trimestres.reverse(), // Invertir para que empiece por el primer trimestre
+                    series: series.reverse() // Alinear los datos con los trimestres
+                };
+            }
+
+            // Función para renderizar el gráfico con C3.js
+            function renderChart(seriesName) {
+                const data = getSeriesData(seriesName);
+
+                if (chart) {
+                    chart.destroy(); // Destruir gráfico anterior
+                }
+
+                chart = c3.generate({
+                    bindto: '#chart',
+                    data: {
+                        x: 'x',
+                        columns: [
+                            ['x', ...data.trimestres],
+                            [seriesName, ...data.series]
+                        ]
+                    },
+                    axis: {
+                        x: {
+                            type: 'category',
+                            label: 'Trimestres'
+                        },
+                        y: {
+                            label: 'Miles de personas'
+                        }
+                    },
+                    tooltip: {
+                        format: {
+                            value: function (value) {
+                                return `${value} mil personas`;
+                            }
+                        }
+                    },
+                    point: {
+                        show: true
+                    }
+                });
+            }
+
+            // Cambiar de serie cuando se selecciona una nueva opción
+            document.getElementById('opciones').addEventListener('change', function(event) {
+                const selectedOption = event.target.value;
+                renderChart(selectedOption);
+            });
+
+            // Descargar el archivo en formato JSON
+            document.getElementById('id_descarga').addEventListener('click', function() {
+                if (!xmlDoc) {
+                    alert('Por favor, carga primero un archivo XML.');
+                    return;
+                }
+
+                const trimestres = [...xmlDoc.querySelectorAll('trimestre')].map(t => t.textContent);
+                const seriesKeys = ['ocupados', 'parados', 'tasa_actividad', 'tasa_paro'];
+                const data = {};
+
+                seriesKeys.forEach(key => {
+                    const elements = xmlDoc.querySelectorAll(key);
+                    if (elements.length > 0) {
+                        data[key] = [...elements].map(s => parseFloat(s.textContent));
+                    }
+                });
+
+                const jsonOutput = {
+                    trimestres: trimestres.reverse(), // Orden cronológico correcto
+                    series: data
+                };
+
+                const blob = new Blob([JSON.stringify(jsonOutput, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Datos_EPA.json';
+                a.click();
+
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Gráfico Encuesta Población Activa</h1>
+    <p>
+        <label for="id_fichero">Fichero: </label>
+        <input id="id_fichero" type="file"/>
+        <input id="id_descarga" type="button" value="Descargar en formato JSON">
+    </p>
+
+    <p>
+        <select id="opciones" multiple size="7"></select>
+    </p>
+
+    <p>
+        <div id="chart">
+        </div>
+    </p>
+
+    
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Ejemplo Web Storage</title>
+	<style>
+		div {
+			border: 2px solid blue;
+			margin: 2em;
+
+			padding: 1em;
+		}
+	</style>
+	<script type="text/javascript">
+
+		window.onload = () => {
+
+			//añado las funciones a los botones
+			document.querySelector("#btGuardar").onclick = guardarDato;
+			document.querySelector("#btMostrar").onclick = mostrarDato;
+			document.querySelector("#btBorrarDato").onclick = borrarDato;
+			document.querySelector("#btBorrarTodo").onclick = borrarTodosDatos;
+			document.querySelector("#btContenido").onclick = mostrarContenido;
+
+		}
+
+		
+		const guardarDato = () => {
+			var etiqueta = document.getElementById("etiqueta").value
+			var dato = document.getElementById("dato").value;
+
+			//localStorage[etiqueta] = dato;
+			
+			if (etiqueta && dato) {
+				localStorage.setItem(etiqueta, dato);
+            }
+		}
+
+
+		const mostrarDato = () => {
+			var etiqueta = document.getElementById("etiqueta").value;
+            var dato = localStorage.getItem(etiqueta);
+
+            if (dato) {
+                document.getElementById("sal").innerHTML = "Dato: " + dato;
+            } else {
+                document.getElementById("sal").innerHTML = "Introduce un nombre / No hay datos.";
+            }
+		}
+
+
+		const borrarDato = () => {
+			var etiqueta = document.getElementById("etiqueta").value;
+            var dato = localStorage.removeItem(etiqueta);
+
+            if (!dato) {
+                document.getElementById("sal").innerHTML = "Dato eliminado";
+            } else {
+                document.getElementById("sal").innerHTML = "No hay dato para eliminar";
+            }
+		}
+
+
+		const borrarTodosDatos = () => {
+			var etiqueta = document.getElementById("etiqueta").value;
+            var dato = localStorage.clear(etiqueta);
+
+            if (!dato) {
+                document.getElementById("sal").innerHTML = "Todos los datos eliminados";
+            } else {
+                document.getElementById("sal").innerHTML = "No hay datos para eliminar";
+            }
+		}
+
+
+		const mostrarContenido = () => {
+			var contenido = document.getElementById("contenido");
+			var dato = localStorage.setItem(etiqueta);
+			//var l 
+
+
+			for (let i = 0; i < localStorage.length; i++) {
+				contenido.innerHTML += "Elemento "+i+": "+localStorage.getItem(i)
+
+				
+			}
+
+
+            if (dato) {
+                document.getElementById("contenido").innerHTML = "Todo: " + etiqueta;
+            } else {
+                document.getElementById("contenido").innerHTML = "No hay datos para mostrar";
+            }
+		}
+
+
+
+	</script>
+</head>
+
+<body>
+
+	<h3>Esto es un ejermplo de Web Storage</h3>
+
+	<label>Nombre: </label>
+	<input type="text" name="etiqueta" id="etiqueta">
+	<br><br>
+	<label>Dato: </label>
+	<input type="text" name="dato" id="dato">
+	<br /><br />
+
+	<hr>
+	<br><br>
+	<button id="btGuardar">Guardar Dato</button>
+	<button id="btMostrar">Mostrar Dato</button>
+	<button id="btContenido">Contenido del Web Storage</button>
+
+	<button id="btBorrarDato">Borrar Dato</button>
+	<button id="btBorrarTodo">Borrar Todo</button>
+
+	<p>
+	<div id="sal">
+		Aquí ponemos el dato leido del localStorage
+	</div>
+	<div id="nvisitas">
+		Aquí se muestra el número de visitas
+	</div>
+	</p>
+	<p>
+	<div id="contenido">
+		Contenido de todo el Web Storage
+	</div>
+	</p>
+
+</body>
+
+</html>

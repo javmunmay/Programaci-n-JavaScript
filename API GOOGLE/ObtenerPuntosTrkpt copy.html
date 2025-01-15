@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style type="text/css">
+        /* Dimensiones del mapa */
+        #divmapa {
+            width: 700px;
+            height: 700px;
+            border: 1px solid blue;
+        }
+
+        /* Estilo para las instrucciones */
+        #infoViaje {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            max-width: 700px;
+        }
+    </style>
+    <title>API v3 de Google Maps. Ejemplo Básico</title>
+
+    <script type="text/javascript">
+        window.onload = () => {
+            document.querySelector("#id_fichero").addEventListener("change", Leer_Fichero, false);
+        };
+
+        function Leer_Fichero(evento) {
+            console.log("Funcion Leer_Fichero");
+            var e = evento || window.event;
+            var fichero = e.target.files[0];
+
+            function convertir_a_xml(texto) {
+                console.log("Funcion convertir_a_xml");
+                var xml = null;
+                if (window.ActiveXObject) {
+                    xml = new ActiveXObject("Microsoft.XMLDOM");
+                    xml.loadXML(texto);
+                } else {
+                    xml = new DOMParser().parseFromString(texto, "text/xml");
+                    if (xml.getElementsByTagName("parsererror").length > 0) {
+                        console.error("Error al convertir el texto a XML");
+                        return null;
+                    }
+                }
+                return xml;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                let miXML = convertir_a_xml(reader.result);
+                if (miXML) {
+                    console.log("miXML: ", miXML);
+                    tratarXML(miXML);
+                } else {
+                    console.error("No se pudo procesar el XML");
+                }
+            };
+
+            reader.readAsText(fichero);
+        }
+
+        function tratarXML(xml) {
+            console.log("Funcion tratarXML");
+            var puntos = xml.getElementsByTagName("trkpt");
+            alert("número de puntos: " + puntos.length);
+
+            var sal = document.querySelector("#sal");
+
+            sal.innerHTML += "<p> Listado de puntos: </p>";
+            var latitud, longitud;
+            for (let i = 0; i < puntos.length; i++) {
+                latitud = puntos[i].getAttribute("lat");
+                longitud = puntos[i].getAttribute("lon");
+                sal.innerHTML += "latitud:" + latitud + " longitud: " + longitud + "<br>";
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h3>Ejemplo para ver los trkpt del fichero</h3>
+    <label>Inserte un Fichero</label>
+    <input type="file" id="id_fichero">
+    <div id="sal">
+        Aquí aparecerán los trkpt del fichero
+    </div>
+</body>
+
+</html>

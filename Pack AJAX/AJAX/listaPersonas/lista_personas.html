@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Ejercicio Listado Personas. AJAX</title>
+  <style type="text/css">
+    * {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    h3 {
+      color: rgb(21, 0, 179);
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+    }
+
+    /* CSS para el formulario:   */
+    .formPersonas {
+      visibility: hidden;
+      position: absolute;
+      top: 20%;
+      left: 20%;
+      z-index: 11;
+      background-color: white;
+      border: 2px solid black;
+      border-radius: 15px;
+      padding: 1em;
+      color: rgb(21, 0, 179);
+      border-collapse: collapse;
+      align-items: center;
+      margin: 0 auto;
+
+
+      /*	opacity:0;   */
+      /*	transition: all 1s;   */
+    }
+
+    .tabla_personas {
+      background-color: rgb(217, 255, 245);
+      padding: 10px;
+      border-radius: 20px;
+      outline: none;
+      border-collapse: collapse;
+      border: none;
+      align-items: center;
+      margin: 0 auto;
+
+    }
+
+    .tabla_personas th {
+      padding: 10px;
+      border-radius: 20px;
+      outline: none;
+      border-collapse: collapse;
+      border: none;
+      border-bottom: solid black;
+      align-items: center;
+    }
+
+    .tabla_personas tr td {
+      padding: 5px 10px;
+      border-radius: 20px;
+      outline: none;
+      border-collapse: collapse;
+      border: none;
+      align-items: center;
+
+    }
+
+
+    .btn-nuevaPersona,
+    .btn-anade,
+    .btn-cancelar {
+      background-color: white;
+      color: black;
+      border: solid black;
+      padding: 7px;
+      border-radius: 20px;
+    }
+
+    .btn-nuevaPersona:hover,
+    .btn-anade:hover {
+      background-color: white;
+      color: black;
+      
+      border: solid rgb(70, 206, 36);
+    }
+
+
+    .btn-borrar {
+      background-color: white;
+      color: black;
+      border: solid rgb(243, 85, 85);
+      padding: 5px 15px;
+      border-radius: 20px;
+    }
+
+    .btn-borrar:hover,
+    .btn-cancelar:hover {
+      border: solid rgb(180, 0, 0);
+    }
+
+
+    .btn-editar {
+      background-color: white;
+      color: black;
+      border: solid orange;
+      padding: 5px 15px;
+      border-radius: 20px;
+    }
+
+    .btn-editar:hover {
+      border: solid orangered;
+    }
+
+
+
+    .formPersonas div label {
+      display: block;
+      margin-top: 0.5em;
+    }
+
+    .formPersonas .btn {
+      display: block;
+      margin-top: 1em;
+    }
+
+    .ver {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+
+  <script type="text/javascript" src="util2AJAX.js"></script>
+  <script type="text/javascript">
+    let peticion;
+
+    window.onload = () => {
+      peticion = new pAJAX();
+
+      cargarPersonajes("servidor.php");
+
+      //Realizar petición http
+
+      console.log("Acabo de hacer la petición");
+
+      //peticion.open('GET', 'http://localhost/curso/Pack%20AJAX/AJAX/listaPersonas/servidor.php');
+      //peticion.send();
+
+      //peticion.onreadystatechange = primeraLista; // Por cada cambio realizado, llamar a recibe Personas para mostrar los personajes
+      document.getElementById("btNuevaPersona").onclick = mostrarFormulario;
+      document.getElementById("btCancelar").onclick = ocultarFormulario;
+      document.getElementById("btAnade").onclick = annadirPersona;
+    };
+
+    const cargarPersonajes = (url) => {
+      let pintar = new Object();
+      pintar.servicio = "listar";
+      peticion.peticion(url, "POST", pintaPersonajes, JSON.stringify(pintar));
+    };
+
+    const pintaPersonajes = (response) => {
+      let resp = JSON.parse(response);
+
+      llenarTabla(resp);
+    };
+
+    function llenarTabla(personajes) {
+      let cuerpoPersonajes = document.getElementById("filas_tabla");
+      // Limpiar el contenido previo de la tabla
+      cuerpoPersonajes.innerHTML = "";
+
+      // Iterar sobre cada personaje y crear filas en la tabla
+      personajes.forEach((personaje) => {
+        let fila = document.createElement("tr");
+
+        // Crear celdas con la información del personaje
+        let celdaID = document.createElement("td");
+        celdaID.textContent = personaje.ID;
+
+        let celdaDNI = document.createElement("td");
+        celdaDNI.textContent = personaje.DNI;
+
+        let celdaNOMBRE = document.createElement("td");
+        celdaNOMBRE.textContent = personaje.NOMBRE;
+
+        let celdaAPELLIDO = document.createElement("td");
+        celdaAPELLIDO.textContent = personaje.APELLIDOS;
+
+        // Agregar las celdas a la fila
+        fila.appendChild(celdaID);
+        fila.appendChild(celdaDNI);
+        fila.appendChild(celdaNOMBRE);
+        fila.appendChild(celdaAPELLIDO);
+
+        // Crear una celda para el botón de "Borrar"
+        let celdaBorrar = document.createElement("td");
+        var btnBorrar = document.createElement("button");
+        btnBorrar.innerHTML = "Borrar";
+
+        btnBorrar.classList.add("btn-borrar");
+
+        btnBorrar.onclick = (function (celdaNOMBRE, celdaID) {
+          return function () {
+            borrarPersona(celdaNOMBRE, celdaID);
+          };
+        })(personaje.NOMBRE, personaje.ID);
+        celdaBorrar.appendChild(btnBorrar);
+
+        // Crear una celda para el botón de "Editar"
+        let celdaEditar = document.createElement("td");
+        var btnEditar = document.createElement("button");
+        btnEditar.innerHTML = "Editar";
+
+        btnEditar.classList.add("btn-editar");
+
+        btnEditar.onclick = (function (celdaNOMBRE, celdaID) {
+          return function () {
+            modificarPersona(celdaNOMBRE, celdaID);
+          };
+        })(personaje.NOMBRE, personaje.ID);
+        celdaEditar.appendChild(btnEditar);
+
+        // Agregar las celdas de botones a la fila
+        fila.appendChild(celdaBorrar);
+        fila.appendChild(celdaEditar);
+
+        // Agregar la fila al cuerpo de la tabla
+        cuerpoPersonajes.appendChild(fila);
+      });
+    }
+
+    //Añadir Personas a la tabla
+
+    function annadirPersona() {
+      var dni = document.getElementById("dni").value;
+      var nombre = document.getElementById("nombre").value;
+      var apellidos = document.getElementById("apellidos").value;
+
+      var persona = {
+        servicio: "insertar",
+        dni: dni,
+        nombre: nombre,
+        apellidos: apellidos,
+      };
+
+      var datosJSON = JSON.stringify(persona);
+      peticion.peticion(
+        "servidor.php",
+        "POST",
+        (datos) => {
+          pintaPersonajes(datos);
+          ocultarFormulario();
+        },
+        datosJSON
+      );
+    }
+
+    //Modificar Personas de la Tabla
+    let idSeleccionado = null; // Variable para guardar el ID de la persona a modificar
+
+    function modificarPersona(celdaNOMBRE, celdaID) {
+      idSeleccionado = celdaID;
+      if (
+        confirm(
+          "¿Está seguro que quiere modificar a " +
+          celdaNOMBRE +
+          " con ID " +
+          celdaID +
+          " ? "
+        )
+      ) {
+
+        mostrarFormulario();
+
+        document.getElementById("dni").value = celdaID; // Puedes ajustar esto dependiendo de si el ID es igual al DNI o diferente
+        document.getElementById("nombre").value = celdaNOMBRE;
+        document.getElementById("apellidos").value = celdaNOMBRE;
+        document.getElementById("btAnade").innerHTML = "Modificar";
+        document.querySelector("legend").textContent = "Modificar Usuario";
+
+
+        // Configurar el botón "Modificar" para que al hacer clic modifique los datos
+        document.getElementById("btAnade").onclick = actualizarPersona;
+
+
+      }
+    }
+
+    function actualizarPersona() {
+      var dni = document.getElementById("dni").value;
+      var nombre = document.getElementById("nombre").value;
+      var apellidos = document.getElementById("apellidos").value;
+
+
+      var personaModificada = {
+        servicio: "modificar",
+        id: idSeleccionado, // Usar el ID que se guardó al seleccionar "Editar"
+        dni: dni,
+        nombre: nombre,
+        apellidos: apellidos,
+      };
+
+      var datosJSON = JSON.stringify(personaModificada);
+
+      // Enviar la petición para modificar la persona
+      peticion.peticion(
+        "servidor.php",
+        "POST",
+        (datos) => {
+          pintaPersonajes(datos); // Actualizamos la tabla tras modificar
+          ocultarFormulario(); // Ocultamos el formulario
+        },
+        datosJSON
+      );
+    }
+
+    function mostrarFormulario() {
+      document.getElementById("formPersonas").style.visibility = "visible";
+    }
+
+    function ocultarFormulario() {
+      document.getElementById("formPersonas").style.visibility = "hidden";
+      document.querySelector("legend").textContent = "Registro de Usuarios";
+      document.getElementById("btAnade").innerHTML = "Añadir";
+      document.getElementById("btAnade").onclick = annadirPersona;
+    }
+
+    //Borrar Personas de la tabla
+
+    function borrarPersona(celdaNOMBRE, celdaID) {
+      if (
+        confirm(
+          "¿Está seguro que quiere eliminar a " +
+          celdaNOMBRE +
+          " con ID " +
+          celdaID +
+          " ? "
+        )
+      ) {
+        var Borrar = {
+          servicio: "borrar",
+          id: celdaID,
+        };
+
+        var datosJSON = JSON.stringify(Borrar);
+
+        peticion.peticion(
+          "servidor.php",
+          "POST",
+          (datos) => {
+            pintaPersonajes(datos);
+            ocultarFormulario();
+          },
+          datosJSON
+        );
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h3>Registro de Usuarios</h3>
+
+  <div id="formPersonas" class="formPersonas">
+    <fieldset>
+      <legend>Alta en el servicio</legend>
+      <div>
+        <label for="dni">DNI</label>
+        <input type="text" id="dni" size="10" maxlength="9" value="27473339T" />
+      </div>
+      <div>
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" value="Marco Elio" />
+      </div>
+      <div>
+        <label for="apellidos">Apellidos</label>
+        <input type="text" id="apellidos" size="40" value="García Gomariz" />
+      </div>
+      <div class="btn">
+        <button id="btAnade" class="btn-anade">Añadir</button>
+        <button id="btCancelar" class="btn-cancelar">Cancelar</button>
+      </div>
+    </fieldset>
+  </div>
+
+  <!--
+    <div id="formPersonasMOD" class="formPersonas">
+      <fieldset>
+        <legend>Modificar Usuario</legend>
+        <div>
+          <label for="dniMOD">DNI</label>
+          <input type="text" id="dniMOD" size="10" maxlength="9" />
+        </div>
+        <div>
+          <label for="nombreMOD">Nombre</label>
+          <input type="text" id="nombreMOD" />
+        </div>
+        <div>
+          <label for="apellidosMOD">Apellidos</label>
+          <input type="text" id="apellidosMOD" size="40" />
+        </div>
+        <div class="btn">
+          <button id="btModificar">Modificar</button>
+          <button id="btCancelarMOD" onclick="ocultarFormularioMOD()">
+            Cancelar
+          </button>
+        </div>
+      </fieldset>
+    </div>
+    -->
+
+  <br />
+  <button class="btn-nuevaPersona" id="btNuevaPersona">Nueva persona</button>
+  <br /><br />
+  <table id="tabla_personas" border="1" class="tabla_personas">
+    <tr>
+      <th>ID</th>
+      <th>DNI</th>
+      <th>NOMBRE</th>
+      <th>APELLIDOS</th>
+      <th>Borrar</th>
+      <th>Editar</th>
+    </tr>
+
+    <tbody id="filas_tabla" class="filas_tabla"></tbody>
+  </table>
+
+  <br /><br />
+</body>
+
+</html>

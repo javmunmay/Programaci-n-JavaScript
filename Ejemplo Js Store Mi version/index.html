@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <title>Prueba IndexedDB</title>
+ 
+	<!--
+		Para JsStore manejador de base de datos IndexedDB
+		Utiliza: jsstore.min.js y jsstore.min.worker.js.
+		https://jsstore.net/
+		<script src="js/jsstore.min.worker.js"></script>
+
+		<script src="https://cdn.jsdelivr.net/npm/jsstore/dist/jsstore.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jsstore/dist/jsstore.worker.min.js"></script>
+
+	-->
+	
+	<script src="jsstore/jsstore.min.js"></script>
+	<script src="jsstore/jsstore.worker.min.js"></script>
+	<script src="BD.js"></script>
+	
+	<script>
+		BD();
+	</script>
+
+    <style>
+        #tablaPersonas{
+            border: solid 1px;
+        }
+
+        /*
+        *{
+            cursor: url(ruta/...) 10 10, auto;
+        }
+        */
+
+        /*imagenBlob: {notNull: false, dataType: "object")}*/
+        /*imagen64: {notNull: false, dataType: "string")}*/
+
+    </style>
+    
+
+
+	<script>
+
+		// Inicializar la base de datos
+        const db = new BD();
+
+        // Cargar personas al iniciar la página
+        window.onload = function () {
+            cargarPersonas();
+        };
+
+        // Función para cargar todas las personas y mostrarlas en la tabla
+        async function cargarPersonas() {
+            const personas = await db.obtenerPersonas();
+            const tablaPersonas = document.getElementById("tablaPersonas");
+            tablaPersonas.innerHTML = ""; // Limpiar la tabla
+
+            personas.forEach(persona => {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `
+                    <td>${persona.id}</td>
+                    <td>${persona.dni}</td>
+                    <td>${persona.nombre}</td>
+                    <td>${persona.apellidos || ""}</td>
+                    <td>${persona.fnacimiento ? new Date(persona.fnacimiento).toLocaleDateString() : ""}</td>
+                    <td>${persona.estatura || ""}</td>
+                    <td>
+                        <button onclick="editarPersona(${persona.id})">Editar</button>
+                        <button onclick="eliminarPersona(${persona.id})">Eliminar</button>
+                    </td>
+                `;
+                tablaPersonas.appendChild(fila);
+            });
+
+            ocultarFormulario()
+            
+        }
+
+        function mostrarFormularioP(){
+            document.getElementById("personaForm").style.visibility = "visible";
+            limpiarFormulario();
+        }
+
+        function mostrarFormulario(){
+            document.getElementById("personaForm").style.visibility = "visible";
+            
+        }
+
+        function ocultarFormulario(){
+            document.getElementById("personaForm").style.visibility = "hidden";
+            limpiarFormulario();
+        }
+
+        // Función para agregar o actualizar una persona
+        async function agregarOActualizarPersona() {
+            const id = document.getElementById("personaId").value;
+            const dni = document.getElementById("dni").value;
+            const nombre = document.getElementById("nombre").value;
+            const apellidos = document.getElementById("apellidos").value;
+            const fnacimiento = document.getElementById("fnacimiento").value;
+            const estatura = parseFloat(document.getElementById("estatura").value);
+
+            const persona = {
+                dni: dni,
+                nombre: nombre,
+                apellidos: apellidos || null,
+                fnacimiento: fnacimiento ? new Date(fnacimiento) : null,
+                estatura: isNaN(estatura) ? null : estatura
+            };
+
+            if (id) {
+                // Actualizar persona
+                await db.actualizarPersona(parseInt(id), persona);
+            } else {
+                // Agregar nueva persona
+                await db.insertarPersona(persona);
+            }
+            
+            
+            mostrarFormulario()
+            limpiarFormulario();
+            cargarPersonas();
+        }
+
+        // Función para eliminar una persona
+        async function eliminarPersona(id) {
+            if(confirm("¿Estás seguro que quieres eliminar esta persona?")){
+            await db.eliminarPersona(id);
+            }
+
+            cargarPersonas();
+        }
+
+        // Función para editar una persona (cargar datos en el formulario)
+        async function editarPersona(id) {
+            const personas = await db.obtenerPersonas();
+            const persona = personas.find(p => p.id === id);
+
+            if (persona) {
+                document.getElementById("personaId").value = persona.id;
+                document.getElementById("dni").value = persona.dni;
+                document.getElementById("nombre").value = persona.nombre;
+                document.getElementById("apellidos").value = persona.apellidos || "";
+                document.getElementById("fnacimiento").value = persona.fnacimiento ? new Date(persona.fnacimiento).toISOString().split('T')[0] : "";
+                document.getElementById("estatura").value = persona.estatura || "";
+            }
+
+            
+            
+            mostrarFormulario()
+        }
+
+        // Función para limpiar el formulario
+        function limpiarFormulario() {
+            document.getElementById("personaId").value = "";
+            document.getElementById("dni").value = "";
+            document.getElementById("nombre").value = "";
+            document.getElementById("apellidos").value = "";
+            document.getElementById("fnacimiento").value = "";
+            document.getElementById("estatura").value = "";
+        }
+    </script>
+
+	</script>
+
+
+</head>
+
+<body >
+
+	<div id="pPrincipal">
+		
+  
+		<h2>Lista de Personas</h2>
+        <button type="button" onclick="mostrarFormularioP()">Añadir Persona</button>
+		<br>
+        <br>
+		<table id="tabla_personas" border="1">
+            <thead>
+				<tr>
+					<th>ID</th>
+					<th>DNI</th>
+					<th>Nombre</th>
+					<th>Apellidos</th>
+					<th>Fecha de Nacimiento</th>
+					<th>Estatura</th>
+					<th>Acciones</th>
+				</tr>
+			</thead>
+			<tbody id="tablaPersonas">
+				<!-- Filas de personas se generarán aquí -->
+			</tbody>
+		</table>
+
+        <br>
+
+        <!-- Formulario para agregar o actualizar una persona -->
+		<form id="personaForm">
+			<input type="hidden" id="personaId">
+			<label>DNI:</label>
+			<input type="text" id="dni" required><br>
+			<label>Nombre:</label>
+			<input type="text" id="nombre" required><br>
+			<label>Apellidos:</label>
+			<input type="text" id="apellidos"><br>
+			<label>Fecha de Nacimiento:</label>
+			<input type="date" id="fnacimiento" required><br>
+			<label>Estatura:</label>
+			<input type="number" id="estatura" step="0.01"><br>
+			<button type="button" onclick="agregarOActualizarPersona()">Guardar</button>
+			<button type="button" onclick="limpiarFormulario()">Limpiar</button>
+			<button type="button" onclick="ocultarFormulario()">Cancelar</button>
+		</form>
+	</div>
+   
+
+
+
+</body>
+
+</html>

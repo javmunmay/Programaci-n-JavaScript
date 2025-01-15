@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráfico Encuesta Población Activa</title>
+    <link href="c3-0.7.20/c3.css" rel="stylesheet">
+    <script src="c3-0.7.20/docs/js/d3-5.8.2.min.js"></script>
+    <script src="c3-0.7.20/c3.min.js"></script>
+    <script type="text/javascript">
+            let xmlDoc = null;
+
+// Leer el fichero XML
+function LeerFichero(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const parser = new DOMParser();
+            xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+
+            // Extraer etiquetas de cada fila y llenar el select
+            const etiquetas = [];
+            const rows = xmlDoc.getElementsByTagName('row');
+            for (let i = 0; i < rows.length; i++) {
+                const children = rows[i].children;
+                for (let j = 0; j < children.length; j++) {
+                    const etiqueta = children[j].nodeName;
+                    if (!etiquetas.includes(etiqueta)) {
+                        etiquetas.push(etiqueta); 
+                    }
+                }
+            }
+
+            // Rellenar el select con las etiquetas encontradas
+            const selectOpciones = document.getElementById('opciones');
+            selectOpciones.innerHTML = ''; 
+            etiquetas.forEach(etiqueta => {
+                const option = document.createElement('option');
+                option.value = etiqueta;
+                option.textContent = etiqueta;
+                selectOpciones.appendChild(option);
+            });
+        };
+        reader.readAsText(file);
+    }
+}
+
+// Pintar el gráfico
+function pintarGrafico() {
+    if (!xmlDoc) {
+        alert("Primero carga un archivo XML.");
+        return;
+    }
+
+    // Obtener la opción seleccionada
+    const selectOpciones = document.getElementById('opciones');
+    const opcionSeleccionada = selectOpciones.value;
+
+    if (!opcionSeleccionada) {
+        alert("Por favor selecciona una opción.");
+        return;
+    }
+
+    // Extraer datos del XML
+    const trimestres = [];
+    const valores = [];
+    const rows = xmlDoc.getElementsByTagName('row');
+
+    for (let i = 0; i < rows.length; i++) {
+        const trimestre = rows[i].getElementsByTagName('trimestre')[0]?.textContent;
+        const valor = rows[i].getElementsByTagName(opcionSeleccionada)[0]?.textContent;
+
+        if (trimestre && valor) {
+            trimestres.push(trimestre);
+            valores.push(parseFloat(valor));
+        }
+    }
+
+    trimestres.reverse();
+
+    if (trimestres.length === 0 || valores.length === 0) {
+        alert("No se encontraron datos suficientes para generar el gráfico.");
+        return;
+    }
+
+    // Crear gráfico
+    c3.generate({
+        bindto: '#salirGrafico',
+        data: {
+            x: 'x',
+            columns: [
+                ['x', ...trimestres],
+                [opcionSeleccionada, ...valores],
+            ],
+        },
+        axis: {
+            x: {
+                type: 'category',
+                label: 'Trimestres',
+            },
+            y: {
+                label: 'Valores',
+            },
+        },
+    });
+
+    // Descargar el archivo en formato JSON
+    document.getElementById('id_descarga').addEventListener('click', function() {
+                if (!xmlDoc) {
+                    alert('Por favor, carga primero un archivo XML.');
+                    return;
+                }
+
+                const trimestres = [...xmlDoc.querySelectorAll('trimestre')].map(t => t.textContent);
+                const seriesKeys = ['ocupados', 'parados', 'tasa_actividad', 'tasa_paro'];
+                const data = {};
+
+                seriesKeys.forEach(key => {
+                    const elements = xmlDoc.querySelectorAll(key);
+                    if (elements.length > 0) {
+                        data[key] = [...elements].map(s => parseFloat(s.textContent));
+                    }
+                });
+
+                const jsonOutput = {
+                    trimestres: trimestres, // Orden cronológico correcto
+                    series: data
+                };
+
+                const blob = new Blob([JSON.stringify(jsonOutput, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Datos_EPA.json';
+                a.click();
+
+                URL.revokeObjectURL(url);
+            });
+}
+
+
+
+window.onload = function () {
+    // Cargar archivo
+    document.getElementById('id_fichero').addEventListener('change', LeerFichero);
+
+    // Detectar selección en el select y pintar el gráfico
+    document.getElementById('opciones').addEventListener('change', pintarGrafico);
+};
+    </script>
+</head>
+<body>
+    <h1>Gráfico Encuesta Población Activa</h1>
+    <p>
+        <label for="id_fichero">Fichero</label>
+        <input id="id_fichero" type="file" />
+        <label for="id_fichero">Datos EPA.xml</label>
+        <input id="id_descarga" type="button" value="Descargar en formato JSON"/>
+    </p>
+    <select id="opciones" multiple size="6">
+    </select>
+    <p>Encuesta de Población Activa (EPA). Serie histórica (Datos en miles de personas)</p>
+    <div id="salirGrafico"></div>
+</body>
+</html>

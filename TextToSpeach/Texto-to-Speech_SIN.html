@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>   
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> 
+    <title>Plantilla</title>
+    <script type="text/javascript">
+      window.onload = () => {
+        llenarVoces();
+
+        document.querySelector('#btnHablar').addEventListener('click', () => {
+          hablar();
+        });
+      }
+
+      var synth = window.speechSynthesis;
+      var voces = [];
+
+      function llenarVoces() {
+        voces = synth.getVoices();
+        
+        if (voces.length === 0) {
+          synth.onvoiceschanged = llenarVoces;
+          return;
+        }
+		
+        var listaVoces = document.querySelector('#listaVoces');
+        listaVoces.innerHTML = '';
+
+		//Console.log();
+		console.log("Voces: ",listaVoces);
+        
+        voces.forEach((voz) => {
+          var option = document.createElement('option');
+          option.textContent = voz.name;
+          option.setAttribute('data-lang', voz.lang);
+          option.setAttribute('data-name', voz.name);
+          listaVoces.appendChild(option);
+
+		  console.log("Voz: ",voz);
+        });
+
+		
+      }
+
+      function hablar() {
+        var texto = document.querySelector('#texto').value;
+
+		//console.log("Texto: ", texto);
+        
+        var utterance = new SpeechSynthesisUtterance(texto);
+
+		//console.log("utterance: ", texto);
+
+
+        var selectedVoiceName = document.querySelector('#listaVoces').selectedOptions[0].getAttribute('data-name');
+
+		//console.log("selectedVoiceName: ", texto);
+
+
+        voces.forEach((voz) => {
+          if (voz.name === selectedVoiceName) {
+            utterance.voice = voz;
+          }
+        });
+
+        synth.speak(utterance);
+      }
+    </script>
+  </head>
+  
+  <body>
+
+    <div>
+      <label>Selecciona Voz:</label>
+      <select id="listaVoces"></select> 
+    </div>
+    <br><br>
+
+    <div>
+      <textarea id="texto" rows="7" cols="44">Esto es un texto de prueba</textarea>
+    </div>
+
+    <br><br>
+    <button id="btnHablar">Hablar</button>
+
+  </body>
+</html>

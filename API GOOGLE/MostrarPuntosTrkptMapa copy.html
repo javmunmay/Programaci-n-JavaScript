@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style type="text/css">
+        /* Dimensiones del mapa */
+        #divmapa {
+            width: 700px;
+            height: 700px;
+            border: 1px solid blue;
+        }
+
+        /* Estilo para las instrucciones */
+        #infoViaje {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            max-width: 700px;
+        }
+    </style>
+    <title>Mostrar trkpt en Google Maps</title>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyA6rLid89W1HGF2lCnQbfx62tr-57ugzdU">
+
+    </script>
+    <script type="text/javascript">
+        let mapa;
+
+        window.onload = function () {
+            document.getElementById("id_fichero").addEventListener("change", Leer_Fichero, false);
+            cargarMapa();
+        };
+
+        function cargarMapa() {
+            const divMapa = document.getElementById("divmapa");
+            const centro = new google.maps.LatLng(37.388288, -5.9834368); // Coordenadas iniciales
+            const opciones = {
+                center: centro,
+                zoom: 5,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            // Crear el mapa
+            mapa = new google.maps.Map(divMapa, opciones);
+        }
+
+        function Leer_Fichero(evento) {
+            console.log("Funcion Leer_Fichero");
+            var e = evento || window.event;
+            var fichero = e.target.files[0];
+
+            function convertir_a_xml(texto) {
+                console.log("Funcion convertir_a_xml");
+                var xml = null;
+                if (window.ActiveXObject) {
+                    xml = new ActiveXObject("Microsoft.XMLDOM");
+                    xml.loadXML(texto);
+                } else {
+                    xml = new DOMParser().parseFromString(texto, "text/xml");
+                    if (xml.getElementsByTagName("parsererror").length > 0) {
+                        console.error("Error al convertir el texto a XML");
+                        return null;
+                    }
+                }
+                return xml;
+            }
+
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                let miXML = convertir_a_xml(reader.result);
+                if (miXML) {
+                    console.log("miXML: ", miXML);
+                    tratarXML(miXML);
+                } else {
+                    console.error("No se pudo procesar el XML");
+                }
+            };
+
+            reader.readAsText(fichero);
+        }
+
+        const iconoPequeño = {
+            url: "circulo.png",
+            scaledSize: new google.maps.Size(8, 8) // Escalado más pequeño
+        };
+
+        function tratarXML(xml) {
+            console.log("Funcion tratarXML");
+            var puntos = xml.getElementsByTagName("trkpt");
+
+            alert("Número de puntos: " + puntos.length);
+
+            const bounds = new google.maps.LatLngBounds();
+
+            for (let i = 0; i < puntos.length; i++) {
+                const latitud = parseFloat(puntos[i].getAttribute("lat"));
+                const longitud = parseFloat(puntos[i].getAttribute("lon"));
+
+                // Crear un marcador para cada punto
+                const marcador = new google.maps.Marker({
+                    position: new google.maps.LatLng(latitud, longitud),
+                    map: mapa,
+                    icon: iconoPequeño,
+                    title: `Punto ${i + 1}`
+                });
+
+                // Extender los límites del mapa
+                bounds.extend(marcador.position);
+            }
+
+            // Ajustar el mapa a los límites de los puntos
+            mapa.fitBounds(bounds);
+        }
+    </script>
+</head>
+
+<body>
+    <h3>Mostrar puntos trkpt en un mapa</h3>
+    <p>
+        <label for="id_fichero">Selecciona el archivo GPX/TCX:</label><br>
+        <input id="id_fichero" type="file">
+    </p>
+    <div id="divmapa">
+        <!-- Aquí se renderiza el mapa -->
+    </div>
+</body>
+
+</html>
